@@ -25,6 +25,11 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     private Object                  mChangeState;
     private boolean                 mIsGoing = false;
 
+    private Mat                     mRgbaImg;
+    private Mat                     mGrayImag;
+
+    private IEngineJNI              mEngine;
+
     // Used to load the 'native-lib' library on application startup.
     static
     {
@@ -40,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
                     mOpenCameraView.enableView();
+                    mEngine = new IEngineJNI();
                 } break;
                 default:
                 {
@@ -145,10 +151,16 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     public Mat onCameraFrame(CvCameraViewFrame inputFrame)
     {
 
-        Mat im = inputFrame.rgba();
-        Imgproc.resize(im, im, new Size(640.0, 480.0));
-        long add = im.getNativeObjAddr();
+//        Mat im = inputFrame.rgba();
+//        Imgproc.resize(im, im, new Size(640.0, 480.0));
+//        long add = im.getNativeObjAddr();
 
-        return inputFrame.rgba();
+        // Feature detection
+        mRgbaImg = inputFrame.rgba();
+        mGrayImag = inputFrame.gray();
+        mEngine.FindFeatures(mGrayImag.getNativeObjAddr(), mRgbaImg.getNativeObjAddr());
+
+
+        return mRgbaImg;
     }
 }

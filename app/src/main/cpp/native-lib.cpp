@@ -1,10 +1,15 @@
 #include <jni.h>
 #include <string>
+#include <vector>
+
 #include <opencv2/opencv.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/features2d.hpp>
 #include <opencv2/core/ocl.hpp>
 
 
-
+using namespace std;
+using namespace cv;
 
 extern "C"
 JNIEXPORT jstring JNICALL
@@ -28,10 +33,3 @@ Java_org_jjhartmann_jeremy_testopencv2_MainActivity_stringFromJNI(
 }
 
 
-JNIEXPORT void JNICALL
-Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_FindFeatures(JNIEnv *env, jobject instance,
-                                                               jlong matAddrGr, jlong matAddrRGB) {
-
-    // TODO
-
-}

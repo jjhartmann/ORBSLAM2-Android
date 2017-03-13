@@ -19,7 +19,8 @@ add_library( native-lib
              SHARED
 
              # Provides a relative path to your source file(s).
-             src/main/cpp/native-lib.cpp )
+             src/main/cpp/native-lib.cpp
+             src/main/cpp/CEngine.cpp)
 
 ####################################################################################################
 ## Open CV 3.2
