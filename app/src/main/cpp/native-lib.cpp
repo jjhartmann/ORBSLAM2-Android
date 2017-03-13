@@ -1,6 +1,10 @@
 #include <jni.h>
 #include <string>
 #include <opencv2/opencv.hpp>
+#include <opencv2/core/ocl.hpp>
+
+
+
 
 extern "C"
 JNIEXPORT jstring JNICALL
@@ -21,4 +25,13 @@ Java_org_jjhartmann_jeremy_testopencv2_MainActivity_stringFromJNI(
     }
 
     return env->NewStringUTF(hello.c_str());
+}
+
+
+JNIEXPORT void JNICALL
+Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_FindFeatures(JNIEnv *env, jobject instance,
+                                                               jlong matAddrGr, jlong matAddrRGB) {
+
+    // TODO
+
 }
