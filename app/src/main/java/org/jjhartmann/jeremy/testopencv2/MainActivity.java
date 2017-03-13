@@ -3,6 +3,8 @@ package org.jjhartmann.jeremy.testopencv2;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.SurfaceView;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -18,12 +20,15 @@ import org.opencv.imgproc.Imgproc;
 
 public class MainActivity extends AppCompatActivity implements CvCameraViewListener2
 {
-    private static final String TAG = "VIO_UW_SAR::Activity";
+    private static final String     TAG = "VIO_UW_SAR::Activity";
+    private CameraBridgeViewBase    mOpenCameraView;
+    private Object                  mChangeState;
+    private boolean                 mIsGoing = false;
+
     // Used to load the 'native-lib' library on application startup.
     static
     {
         System.loadLibrary("native-lib");
-        System.loadLibrary("opencv_java3");
     }
 
     // Call back for async opencv init
@@ -34,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
                 case LoaderCallbackInterface.SUCCESS:
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
-
+                    mOpenCameraView.enableView();
                 } break;
                 default:
                 {
@@ -49,16 +54,18 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
 
-        TextView textView = (TextView) findViewById(R.id.textView);
-//        if (!OpenCVLoader.initDebug()) {
-//            textView.setText(textView.getText() + "\n OpenCVLoader.initDebug(), not working.");
-//        } else {
-//            textView.setText(textView.getText() + "\n OpenCVLoader.initDebug(), WORKING.");
-//            //DRS 20160822c Added 1
-//            // textView.setText(textView.getText() + "\n" + validate(0L, 0L));
-//        }
+        // Init the camera view
+        mOpenCameraView = (CameraBridgeViewBase) findViewById(R.id.tutorial1_activity_java_surface_view);
+        mOpenCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCameraView.setCvCameraViewListener(this);
+
+
+        //TextView textView = (TextView) findViewById(R.id.textView);
+
+
 
         // Example of a call to a native method
         TextView tv = (TextView) findViewById(R.id.sample_text);
@@ -69,6 +76,27 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     public void onResume() {
         super.onResume();
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_2_0, this, mLoaderCallback);
+    }
+
+    /**
+     * Dispatch onPause() to fragments.
+     */
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        if (mOpenCameraView != null) {
+            mOpenCameraView.disableView();
+        }
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        if (mOpenCameraView != null) {
+            mOpenCameraView.disableView();
+        }
     }
 
     /**
@@ -116,6 +144,11 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     @Override
     public Mat onCameraFrame(CvCameraViewFrame inputFrame)
     {
-        return null;
+
+        Mat im = inputFrame.rgba();
+        Imgproc.resize(im, im, new Size(640.0, 480.0));
+        long add = im.getNativeObjAddr();
+
+        return inputFrame.rgba();
     }
 }
