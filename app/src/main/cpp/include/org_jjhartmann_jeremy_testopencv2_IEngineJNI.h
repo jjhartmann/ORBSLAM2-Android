@@ -10,9 +10,17 @@
 #include <opencv2/core/ocl.hpp>
 
 #include <vector>
+
+#include "VIOImage.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+VIOImage *imageAddrCurrent;
+VIOImage *imageAddrPrevious;
+VIOImage *imageAddrPending;
+
 /*
  * Class:     org_jjhartmann_jeremy_testopencv2_IEngineJNI
  * Method:    FindFeatures
@@ -23,6 +31,14 @@ JNIEXPORT void JNICALL Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_FindFea
 
 JNIEXPORT jobject JNICALL Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_VisualOdometry
         (JNIEnv *env, jobject instance, jlong matAddrCurrent);
+
+JNIEXPORT void JNICALL Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_Start(
+        JNIEnv *env,
+        jobject instance,
+        jint width,
+        jint height);
+
+
 #ifdef __cplusplus
 }
 #endif

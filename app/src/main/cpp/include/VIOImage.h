@@ -21,6 +21,8 @@ public:
 
     void CreateOctaves(long imgAddr);
     void CleanOctaves();
+
+    // Get
     unsigned int GetOctaveCount();
 private:
     // Member Variables

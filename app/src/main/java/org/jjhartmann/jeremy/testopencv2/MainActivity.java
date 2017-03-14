@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     private Mat                     mGrayImag;
 
     private IEngineJNI              mEngine;
+    private Object                  mEngineLock;
 
     // Used to load the 'native-lib' library on application startup.
     static
@@ -47,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
                     mOpenCameraView.enableView();
-                    mEngine = new IEngineJNI();
                 } break;
                 default:
                 {
@@ -76,7 +76,10 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         mOpenCameraView.setCvCameraViewListener(this);
 
 
-        //TextView textView = (TextView) findViewById(R.id.textView);
+        // Create Engine
+        mEngine = new IEngineJNI();
+
+
 
 
 
@@ -134,7 +137,10 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     @Override
     public void onCameraViewStarted(int width, int height)
     {
-
+        if (!mEngine.isRunning){
+            mEngine.Start(width, height);
+            mEngine.isRunning = true;
+        }
     }
 
     /**
@@ -158,6 +164,10 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     public Mat onCameraFrame(CvCameraViewFrame inputFrame)
     {
 
+        // Start Engine
+        if (mEngine == null){
+
+        }
 //        Mat im = inputFrame.rgba();
 //        Imgproc.resize(im, im, new Size(640.0, 480.0));
 //        long add = im.getNativeObjAddr();

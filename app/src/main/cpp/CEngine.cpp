@@ -32,3 +32,16 @@ Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_VisualOdometry(JNIEnv *env, jo
     // TODO: COnduct visual odometrry
 
 }
+
+JNIEXPORT void JNICALL
+Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_Start(JNIEnv *env, jobject instance,
+                                                        jint width,
+                                                        jint height) {
+
+    // TODO: Create initlilization of VIO
+    int w = width;
+    int h = height;
+    imageAddrCurrent = new VIOImage(4, 0.5, w, h);
+    imageAddrPrevious = new VIOImage(4, 0.5, w, h);
+    imageAddrPending = new VIOImage(4, 0.5, w, h);
+}

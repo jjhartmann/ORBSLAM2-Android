@@ -18,12 +18,16 @@ VIOImage::VIOImage(const unsigned int oc,
 
 void VIOImage::CreateOctaves(long imgAddr) {
     Mat &currImg = *(Mat*) imgAddr;
-    double currReducer = SIZE_REDUCED;
-    for (int i = 0; i < OCTAVE_COUNT; ++i){
+    int w = round(ORIGINAL_WIDTH * SIZE_REDUCED);
+    int h = round(ORIGINAL_HEIGHT * SIZE_REDUCED);
+
+    // Resize image
+    Mat newImg;
+    resize(currImg, newImg, Size(w, h));
+    mImages.push_back(newImg);
+    for (int i = 0; i < OCTAVE_COUNT - 1; ++i){
         Mat dstImg;
-        int w = round(ORIGINAL_WIDTH * currReducer);
-        int h = round(ORIGINAL_HEIGHT * currReducer);
-        resize(currImg, dstImg, Size(w, h));
+        pyrDown(mImages[i], dstImg);
         mImages.push_back(dstImg);
     }
 }
