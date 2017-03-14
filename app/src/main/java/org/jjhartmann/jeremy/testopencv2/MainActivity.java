@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         setContentView(R.layout.activity_main);
 
         // Init the camera view
+
         mOpenCameraView = (CameraBridgeViewBase) findViewById(R.id.tutorial1_activity_java_surface_view);
         mOpenCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCameraView.setCvCameraViewListener(this);

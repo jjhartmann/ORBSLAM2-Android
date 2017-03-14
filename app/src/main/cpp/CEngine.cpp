@@ -24,3 +24,11 @@ Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_FindFeatures(JNIEnv *env, jobj
         circle(rgbaMat, Point(kp.pt.x, kp.pt.y), 10, Scalar(255,0,0,255));
     }
 }
+
+JNIEXPORT jobject JNICALL
+Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_VisualOdometry(JNIEnv *env, jobject instance,
+                                                                 jlong matAddrCurrent) {
+
+    // TODO: COnduct visual odometrry
+
+}

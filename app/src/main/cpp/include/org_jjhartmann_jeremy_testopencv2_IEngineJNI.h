@@ -21,6 +21,8 @@ extern "C" {
 JNIEXPORT void JNICALL Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_FindFeatures
   (JNIEnv *, jobject, jlong, jlong);
 
+JNIEXPORT jobject JNICALL Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_VisualOdometry
+        (JNIEnv *env, jobject instance, jlong matAddrCurrent);
 #ifdef __cplusplus
 }
 #endif
