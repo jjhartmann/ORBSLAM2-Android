@@ -21,7 +21,8 @@ add_library( native-lib
              # Provides a relative path to your source file(s).
              src/main/cpp/native-lib.cpp
              src/main/cpp/CEngine.cpp
-             src/main/cpp/VIOImage.cpp)
+             src/main/cpp/VIOImage.cpp
+             src/main/cpp/VIOEngine.cpp)
 
 ####################################################################################################
 ## Open CV 3.2

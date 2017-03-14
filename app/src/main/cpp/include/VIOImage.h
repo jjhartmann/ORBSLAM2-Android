@@ -21,6 +21,7 @@ public:
 
     void CreateOctaves(long imgAddr);
     void CleanOctaves();
+    bool isImageLoaded();
 
     // Get
     unsigned int GetOctaveCount();
