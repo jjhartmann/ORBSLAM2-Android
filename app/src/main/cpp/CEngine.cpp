@@ -41,7 +41,17 @@ Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_Start(JNIEnv *env, jobject ins
     // TODO: Create initlilization of VIO
     int w = width;
     int h = height;
-    imageAddrCurrent = new VIOImage(4, 0.5, w, h);
-    imageAddrPrevious = new VIOImage(4, 0.5, w, h);
-    imageAddrPending = new VIOImage(4, 0.5, w, h);
+    mVIOEngineAddr = new VIOEngine();
+    mVIOEngineAddr->Init(w, h);
+
+}
+
+JNIEXPORT void JNICALL
+Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_Stop(JNIEnv *env, jobject instance) {
+
+    // TODO: Clean the mVIOEngine
+    if (mVIOEngineAddr != nullptr){
+        delete mVIOEngineAddr;
+    }
+
 }

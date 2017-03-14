@@ -16,6 +16,10 @@ VIOImage::VIOImage(const unsigned int oc,
     ORIGINAL_HEIGHT = height;
 }
 
+VIOImage::~VIOImage(){
+    ; // TODO: Clean up owned data
+}
+
 void VIOImage::CreateOctaves(long imgAddr) {
     Mat &currImg = *(Mat*) imgAddr;
     int w = round(ORIGINAL_WIDTH * SIZE_REDUCED);

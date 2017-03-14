@@ -33,6 +33,7 @@ private:
     unsigned int ORIGINAL_HEIGHT = 0;
     std::vector<cv::Mat> mImages; // Own
     std::vector<std::vector<cv::KeyPoint>> mKPArray; //Own
+    cv::Mat mOriginalImage;
 };
 
 
