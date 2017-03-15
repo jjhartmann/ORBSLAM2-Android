@@ -36,11 +36,15 @@ Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_VisualOdometry(JNIEnv *env, jo
     // Determine if engine has all required frames.
     if (!mVIOEngineAddr->IsReady())
     {
+        mVIOEngineAddr->ShiftBuffers();
         return;
     }
 
     // Process the image and calculate visual odometry
 
+
+
+    mVIOEngineAddr->ShiftBuffers();
 }
 
 JNIEXPORT void JNICALL

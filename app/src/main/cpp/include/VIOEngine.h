@@ -16,7 +16,7 @@ public:
     void Init(int width, int height);
     bool IsReady();
     void ProcessImage(cv::Mat &inputImg);
-
+    void ShiftBuffers();
 private:
     VIOImage *mCurrentImage;  // OWN
     VIOImage *mPreviousImage; // OWN
@@ -29,9 +29,9 @@ private:
     // Static Methods
 public:
     static void inline Swap(VIOImage *img1, VIOImage *img2){
-        VIOImage *tmp = img1;
-        img1 = img2;
-        img2 = tmp;
+        VIOImage *tmp = img2;
+        img2 = img1;
+        img1 = tmp;
     }
 
 

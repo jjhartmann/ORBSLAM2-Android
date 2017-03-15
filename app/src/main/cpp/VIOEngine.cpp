@@ -45,6 +45,11 @@ bool VIOEngine::IsReady() {
     return mCurrentImage->isImageLoaded() && mPreviousImage->isImageLoaded();
 }
 
+void VIOEngine::ShiftBuffers() {
+    // Clean and swap buffers.
+    mPreviousImage->CleanOctaves();
+    VIOEngine::Swap(mCurrentImage, mPreviousImage);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Private Methods
@@ -61,5 +66,6 @@ void VIOEngine::DetectFeatures(VIOImage *in_vioImg) {
     // TODO: Heuristics using an image pyramid, use low resolution and work up the pyrimad when accuracy fails.
     detector->detect(mCurrentImage->GetGrayAt(0), kp);
 }
+
 
 
