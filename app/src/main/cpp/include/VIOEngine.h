@@ -18,12 +18,20 @@ public:
     void ProcessImage(cv::Mat &inputImg);
     void ShiftBuffers();
 private:
+    // TODO: Refactor image and status information into internal class
     VIOImage *mCurrentImage;  // OWN
     VIOImage *mPreviousImage; // OWN
     VIOImage *mPendingImage;  // OWN
+    std::vector<uchar> mTrackingStatus;
+    std::vector<float> mTrackingError;
+
+    // TODO: Refactor camera pose information from optical flow
+    cv::Mat mCurrentPose_R_f;
+    cv::Mat mCurrentPose_t_f;
 
     // Private Methods
     void DetectFeatures(VIOImage *in_vioImg);
+    void TrackFeatures(VIOImage *img_1, VIOImage *img_2);
 
 
     // Static Methods

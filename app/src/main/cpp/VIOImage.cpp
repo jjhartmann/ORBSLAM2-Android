@@ -76,3 +76,15 @@ vector<KeyPoint>& VIOImage::GetKPAt(int i){
         throw INTEGER_OUT_OF_RANGE;
     return mKPArray[i];
 }
+
+unsigned int VIOImage::GetHeight() {
+    if (mGrayImgs.size() > 0)
+        return mGrayImgs[0].rows;
+    return 0;
+}
+
+unsigned int VIOImage::GetWidth() {
+    if (mGrayImgs.size() > 0)
+        return mGrayImgs[0].cols;
+    return 0;
+}

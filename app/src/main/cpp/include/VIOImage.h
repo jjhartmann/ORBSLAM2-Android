@@ -41,7 +41,8 @@ public:
 
     // Get
     unsigned int GetOctaveCount();
-
+    unsigned int GetWidth();
+    unsigned int GetHeight();
     // Set
     std::vector<cv::KeyPoint>& GetKPAt(int i);
 
