@@ -45,6 +45,7 @@ public:
     unsigned int GetHeight();
     // Set
     std::vector<cv::KeyPoint>& GetKPAt(int i);
+    std::vector<cv::Point2f>& GetKPP2FAt(int i);
 
 private:
     // Member Variables
@@ -55,6 +56,7 @@ private:
     std::vector<cv::Mat> mGrayImgs;
     std::vector<cv::Mat> mImages; // Ref mOriginImage
     std::vector<std::vector<cv::KeyPoint>> mKPArray; // Ref mOriginalImage
+    std::vector<std::vector<cv::Point2f>> mKPPointFArray;
     cv::Mat mOriginalImage; // OWN
 };
 

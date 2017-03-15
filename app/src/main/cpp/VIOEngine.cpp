@@ -77,11 +77,15 @@ void VIOEngine::DetectFeatures(VIOImage *in_vioImg) {
 
     // Params
     int THRESHOLD = 50;
+    int index = 0;
     Ptr<FeatureDetector> detector = FastFeatureDetector::create(THRESHOLD); // TODO: Move this ourside function
-    vector<KeyPoint> &kp = in_vioImg->GetKPAt(0);
+    vector<KeyPoint> &kp = in_vioImg->GetKPAt(index);
 
     // TODO: Heuristics using an image pyramid, use low resolution and work up the pyrimad when accuracy fails.
-    detector->detect(in_vioImg->GetGrayAt(0), kp);
+    detector->detect(in_vioImg->GetGrayAt(index), kp);
+
+    // Convert to Point2F array
+    KeyPoint::convert(kp, in_vioImg->GetKPP2FAt(index));
 }
 
 void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
@@ -91,10 +95,28 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
     TermCriteria termcrit = TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01);
 
     // Calc optical flow from FAST points
-    calcOpticalFlowPyrLK(img_2->GetGrayAt(0),
-                         img_1->GetGrayAt(0),
-                         img_2->GetKPAt(0),
-                         img_1->GetKPAt(0),
+    Mat &grayImg_1 = img_1->GetGrayAt(0);
+    uchar type_1 = grayImg_1.type() & CV_MAT_DEPTH_MASK;
+    int res_1 = grayImg_1.checkVector(2, CV_32F, true);
+    res_1 = grayImg_1.checkVector(2, CV_8S, true);
+    res_1 = grayImg_1.checkVector(2, CV_8U, true);
+    res_1 = grayImg_1.checkVector(2, CV_16S, true);
+    res_1 = grayImg_1.checkVector(2, CV_16U, true);
+    res_1 = grayImg_1.checkVector(2, CV_32S, true);
+    res_1 = grayImg_1.checkVector(2, CV_64F, true);
+
+
+    Mat &grayImg_2 = img_2->GetGrayAt(0);
+    uchar type_2 = grayImg_1.type() & CV_MAT_DEPTH_MASK;
+    int res_2 = grayImg_2.checkVector(2, CV_32F, true);
+
+    vector<Point2f> &kp_1 = img_1->GetKPP2FAt(0);
+    vector<Point2f> &kp_2 = img_2->GetKPP2FAt(0);
+
+    calcOpticalFlowPyrLK(grayImg_2,
+                         grayImg_1,
+                         kp_1,
+                         kp_2,
                          mTrackingStatus,
                          mTrackingError,
                          winSize,
@@ -107,8 +129,8 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
 
     // Get the essential matrix and recover pose
     Mat E, R, t, mask;
-    E = findEssentialMat(img_1->GetKPAt(0), img_2->GetKPAt(0), focalLength, pp, RANSAC, 0.999, 1.0, mask);
-    recoverPose(E, img_1->GetKPAt(0), img_2->GetKPAt(0), R, t, focalLength, pp, mask);
+    E = findEssentialMat(kp_1, kp_2, focalLength, pp, RANSAC, 0.999, 1.0, mask);
+    recoverPose(E,kp_1, kp_2, R, t, focalLength, pp, mask);
 
     // TODO: Calculate the absolute scale
     double scale = 1.0f;
@@ -132,8 +154,8 @@ void VIOEngine::PrintPoint(cv::Mat &in_img, int xOffset, int yOffSet) {
     if (mCurrentPose_t_f.empty() || mCurrentPose_R_f.empty())
         return;
 
-    int x = int(mCurrentPose_t_f.at<double>(0)) + 300;
-    int y = int(mCurrentPose_t_f.at<double>(2)) + 100;
+    int x = int(mCurrentPose_t_f.at<double>(0)) + 640; // X
+    int y = int(mCurrentPose_t_f.at<double>(2)) + 360; // Y
     circle(in_img, Point(x, y) ,1, CV_RGB(255,0,0), 2);
 
     char text[100];

@@ -167,10 +167,6 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     public Mat onCameraFrame(CvCameraViewFrame inputFrame)
     {
 
-        // Start Engine
-        if (mEngine == null){
-
-        }
 //        Mat im = inputFrame.rgba();
 //        Imgproc.resize(im, im, new Size(640.0, 480.0));
 //        long add = im.getNativeObjAddr();
@@ -178,8 +174,10 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         // Feature detection
         mRgbaImg = inputFrame.rgba();
         mGrayImag = inputFrame.gray();
-        mEngine.FindFeatures(mGrayImag.getNativeObjAddr(), mRgbaImg.getNativeObjAddr());
+//        mEngine.FindFeatures(mGrayImag.getNativeObjAddr(), mRgbaImg.getNativeObjAddr());
 
+        // Detect VO1
+        mEngine.VisualOdometry(mRgbaImg.getNativeObjAddr());
 
         return mRgbaImg;
     }

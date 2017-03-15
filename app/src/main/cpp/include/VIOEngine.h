@@ -38,9 +38,10 @@ private:
     // Static Methods
 public:
     static void inline Swap(VIOImage *img1, VIOImage *img2){
-        VIOImage *tmp = img2;
-        img2 = img1;
-        img1 = tmp;
+//        VIOImage **tmp = img2;
+//        *img2 = *img1;
+//        *img1 = tmp;
+        std::swap(img1, img2);
     }
 
 

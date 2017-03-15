@@ -28,6 +28,7 @@ void VIOImage::CreateOctaves(Mat &imgAddr) {
         mOriginalImage.release();
     }
 
+    // TODO: reduce the scale right here?
     imgAddr.copyTo(mOriginalImage);
     int w = round(ORIGINAL_WIDTH * SIZE_REDUCED);
     int h = round(ORIGINAL_HEIGHT * SIZE_REDUCED);
@@ -38,7 +39,7 @@ void VIOImage::CreateOctaves(Mat &imgAddr) {
     mImages.push_back(newImg);
 
     // Convert Color
-    cvtColor(newImg, newImg, COLOR_BGR2GRAY);
+    cvtColor(newImg, newImg, COLOR_RGBA2GRAY);
     mGrayImgs.push_back(newImg);
 
     // Push empty array
@@ -49,10 +50,11 @@ void VIOImage::CreateOctaves(Mat &imgAddr) {
         pyrDown(mImages[i], dstImg);
         mImages.push_back(dstImg);
 
-        cvtColor(dstImg, dstImg, COLOR_BGR2GRAY);
+        cvtColor(dstImg, dstImg, COLOR_RGBA2GRAY);
         mGrayImgs.push_back(newImg);
 
         mKPArray.push_back(vector<KeyPoint>());
+        mKPPointFArray.push_back(vector<Point2f>());
     }
 }
 
@@ -67,6 +69,7 @@ void VIOImage::CleanOctaves() {
     mImages.clear();
     mGrayImgs.clear();
     mKPArray.clear();
+    mKPPointFArray.clear();
 }
 
 unsigned int VIOImage::GetOctaveCount() {
@@ -93,4 +96,10 @@ unsigned int VIOImage::GetWidth() {
     if (mGrayImgs.size() > 0)
         return mGrayImgs[0].cols;
     return 0;
+}
+
+std::vector<cv::Point2f> &VIOImage::GetKPP2FAt(int i) {
+    if (i < 0 || i >= OCTAVE_COUNT)
+        throw INTEGER_OUT_OF_RANGE;
+    return mKPPointFArray[i];
 }
