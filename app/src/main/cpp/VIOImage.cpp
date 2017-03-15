@@ -18,7 +18,7 @@ VIOImage::VIOImage(const unsigned int oc,
 
 VIOImage::~VIOImage(){
     ; // TODO: Clean up owned data
-    mOriginalImage.release();
+    CleanOctaves();
 }
 
 void VIOImage::CreateOctaves(Mat &imgAddr) {
@@ -61,6 +61,12 @@ void VIOImage::CreateOctaves(Mat &imgAddr) {
 void VIOImage::CleanOctaves() {
     // Mat owns data?? Will auto release when unreferenced. Vecotrs?
     mOriginalImage.release();
+
+    // Release Containers in vector.
+    // TODO: Optimise
+    mImages.clear();
+    mGrayImgs.clear();
+    mKPArray.clear();
 }
 
 unsigned int VIOImage::GetOctaveCount() {

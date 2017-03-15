@@ -64,7 +64,8 @@ bool VIOEngine::IsReady() {
 void VIOEngine::ShiftBuffers() {
     // Clean and swap buffers.
     mPreviousImage->CleanOctaves();
-    VIOEngine::Swap(mCurrentImage, mPreviousImage);
+    std::swap(mCurrentImage, mPreviousImage);
+    //VIOEngine::Swap(mCurrentImage, mPreviousImage);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

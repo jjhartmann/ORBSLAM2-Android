@@ -30,7 +30,7 @@ Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_VisualOdometry(JNIEnv *env, jo
                                                                  jlong matAddrCurrent) {
     // TODO: COnduct visual odometrry
 
-    Mat &cImg = *(Mat *)matAddrCurrent;
+    Mat &cImg = *(Mat *)matAddrCurrent; // NOT OWNED
 
     // Process image.
     mVIOEngineAddr->ProcessImage(cImg);
