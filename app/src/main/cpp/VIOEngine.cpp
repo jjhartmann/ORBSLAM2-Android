@@ -127,6 +127,21 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
 
 }
 
+void VIOEngine::PrintPoint(cv::Mat &in_img, int xOffset, int yOffSet) {
+    if (mCurrentPose_t_f.empty() || mCurrentPose_R_f.empty())
+        return;
+
+    int x = int(mCurrentPose_t_f.at<double>(0)) + 300;
+    int y = int(mCurrentPose_t_f.at<double>(2)) + 100;
+    circle(in_img, Point(x, y) ,1, CV_RGB(255,0,0), 2);
+
+    char text[100];
+    rectangle(in_img, Point(10, 30), Point(550, 50), CV_RGB(0,0,0), CV_FILLED);
+    sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", mCurrentPose_t_f.at<double>(0), mCurrentPose_t_f.at<double>(1), mCurrentPose_t_f.at<double>(2));
+    putText(in_img, text, Point(10, 50), FONT_HERSHEY_PLAIN, 1, Scalar::all(255), 1, 8);
+
+}
+
 
 
 

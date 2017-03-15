@@ -17,6 +17,7 @@ public:
     bool IsReady();
     void ProcessImage(cv::Mat &inputImg);
     void ShiftBuffers();
+    void PrintPoint(cv::Mat &in_img, int xOffset = 0, int yOffSet = 0); // Don't Own
 private:
     // TODO: Refactor image and status information into internal class
     VIOImage *mCurrentImage;  // OWN

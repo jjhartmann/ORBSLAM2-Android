@@ -31,8 +31,13 @@ Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_VisualOdometry(JNIEnv *env, jo
     // TODO: COnduct visual odometrry
 
     Mat &cImg = *(Mat *)matAddrCurrent;
+
+    // Process image.
     mVIOEngineAddr->ProcessImage(cImg);
     mVIOEngineAddr->ShiftBuffers();
+
+    // Print Results to image.
+    mVIOEngineAddr->PrintPoint(cImg, cImg.cols/2, cImg.rows/2);
 }
 
 JNIEXPORT void JNICALL
