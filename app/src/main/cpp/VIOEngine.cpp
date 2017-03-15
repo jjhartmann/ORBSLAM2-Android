@@ -34,8 +34,12 @@ void VIOEngine::Init(int width, int height) {
     mPendingImage = new VIOImage(4, 0.5, width, height);
 }
 
-void VIOEngine::ProcessImage(cv::Mat inputImg) {
+void VIOEngine::ProcessImage(cv::Mat &inputImg) {
 
+}
+
+bool VIOEngine::IsReady() {
+    return mCurrentImage->isImageLoaded() && mPreviousImage->isImageLoaded();
 }
 
 

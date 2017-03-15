@@ -18,21 +18,35 @@ VIOImage::VIOImage(const unsigned int oc,
 
 VIOImage::~VIOImage(){
     ; // TODO: Clean up owned data
+    mOriginalImage.release();
 }
 
-void VIOImage::CreateOctaves(long imgAddr) {
-    Mat &currImg = *(Mat*) imgAddr;
+void VIOImage::CreateOctaves(Mat &imgAddr) {
+
+    // Clean memory from previous image
+    if (isImageLoaded()){
+        mOriginalImage.release();
+    }
+
+    imgAddr.copyTo(mOriginalImage);
     int w = round(ORIGINAL_WIDTH * SIZE_REDUCED);
     int h = round(ORIGINAL_HEIGHT * SIZE_REDUCED);
 
     // Resize image
     Mat newImg;
-    resize(currImg, newImg, Size(w, h));
+    resize(mOriginalImage, newImg, Size(w, h));
     mImages.push_back(newImg);
+
+    cvtColor(newImg, newImg, COLOR_BGR2GRAY);
+    mGrayImgs.push_back(newImg);
+
     for (int i = 0; i < OCTAVE_COUNT - 1; ++i){
         Mat dstImg;
         pyrDown(mImages[i], dstImg);
         mImages.push_back(dstImg);
+
+        cvtColor(dstImg, dstImg, COLOR_BGR2GRAY);
+        mGrayImgs.push_back(newImg);
     }
 }
 
@@ -44,4 +58,8 @@ void VIOImage::CleanOctaves() {
 
 unsigned int VIOImage::GetOctaveCount() {
     return OCTAVE_COUNT;
+}
+
+bool VIOImage::isImageLoaded() {
+   return !mOriginalImage.empty();
 }

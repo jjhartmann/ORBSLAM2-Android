@@ -19,7 +19,7 @@ public:
              unsigned int height);
     ~VIOImage();
 
-    void CreateOctaves(long imgAddr);
+    void CreateOctaves(cv::Mat &imgAddr);
     void CleanOctaves();
     bool isImageLoaded();
 
@@ -31,9 +31,10 @@ private:
     double SIZE_REDUCED = 0.3f;
     unsigned int ORIGINAL_WIDTH = 0;
     unsigned int ORIGINAL_HEIGHT = 0;
-    std::vector<cv::Mat> mImages; // Own
-    std::vector<std::vector<cv::KeyPoint>> mKPArray; //Own
-    cv::Mat mOriginalImage;
+    std::vector<cv::Mat> mGrayImgs;
+    std::vector<cv::Mat> mImages; // Ref mOriginImage
+    std::vector<std::vector<cv::KeyPoint>> mKPArray; // Ref mOriginalImage
+    cv::Mat mOriginalImage; // OWN
 };
 
 

@@ -113,6 +113,9 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         if (mOpenCameraView != null) {
             mOpenCameraView.disableView();
         }
+        if (mEngine != null){
+            mEngine.Stop();
+        }
     }
 
     /**

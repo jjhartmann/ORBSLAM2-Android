@@ -14,7 +14,8 @@ public:
     ~VIOEngine();
 
     void Init(int width, int height);
-    void ProcessImage(cv::Mat inputImg);
+    bool IsReady();
+    void ProcessImage(cv::Mat &inputImg);
 
 private:
     VIOImage *mCurrentImage;  // OWN

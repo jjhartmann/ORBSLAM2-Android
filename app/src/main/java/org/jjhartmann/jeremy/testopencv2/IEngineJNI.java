@@ -15,7 +15,7 @@ public class IEngineJNI
     public native void FindFeatures(long matAddrGr, long matAddrRGB);
     public native void Start(int width, int height);
     public native void Stop();
-    public native Point3 VisualOdometry(long matAddrCurrent);
+    public native void VisualOdometry(long matAddrCurrent);
 //    public native void Start();
 //    public native void Clean();
 }

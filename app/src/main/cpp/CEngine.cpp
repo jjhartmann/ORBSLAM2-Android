@@ -25,11 +25,21 @@ Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_FindFeatures(JNIEnv *env, jobj
     }
 }
 
-JNIEXPORT jobject JNICALL
+JNIEXPORT void JNICALL
 Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_VisualOdometry(JNIEnv *env, jobject instance,
                                                                  jlong matAddrCurrent) {
-
     // TODO: COnduct visual odometrry
+
+    Mat &cImg = *(Mat *)matAddrCurrent;
+    mVIOEngineAddr->ProcessImage(cImg);
+
+    // Determine if engine has all required frames.
+    if (!mVIOEngineAddr->IsReady())
+    {
+        return;
+    }
+
+    // Process the image and calculate visual odometry
 
 }
 
