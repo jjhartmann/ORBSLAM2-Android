@@ -9,6 +9,7 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/imgproc.hpp>
 #include <vector>
+#include "VIOConstants.h"
 
 class VIOImage {
 
@@ -23,8 +24,27 @@ public:
     void CleanOctaves();
     bool isImageLoaded();
 
+    // Inline functions for fast reterival.
+    inline cv::Mat& operator[](int i) {
+        if (i < 0 || i >= OCTAVE_COUNT)
+            throw INTEGER_OUT_OF_RANGE;
+
+        return mImages[i];
+    }
+
+    inline cv::Mat& GetGrayAt(int i) {
+        if (i < 0 || i >= OCTAVE_COUNT)
+            throw INTEGER_OUT_OF_RANGE;
+
+        return mGrayImgs[i];
+    }
+
     // Get
     unsigned int GetOctaveCount();
+
+    // Set
+    std::vector<cv::KeyPoint>& GetKPAt(int i);
+
 private:
     // Member Variables
     unsigned int OCTAVE_COUNT = 4;

@@ -6,6 +6,9 @@
 
 #include <opencv2/core.hpp>
 
+using namespace std;
+using namespace cv;
+
 VIOEngine::VIOEngine() :
         mCurrentImage(nullptr),
         mPreviousImage(nullptr),
@@ -40,6 +43,23 @@ void VIOEngine::ProcessImage(cv::Mat &inputImg) {
 
 bool VIOEngine::IsReady() {
     return mCurrentImage->isImageLoaded() && mPreviousImage->isImageLoaded();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Private Methods
+/// : TODO: Refactor this into own class?
+////////////////////////////////////////////////////////////////////////////////////////////////////
+void VIOEngine::DetectFeatures(VIOImage *in_vioImg) {
+
+
+    // Params
+    int THRESHOLD = 50;
+    Ptr<FeatureDetector> detector = FastFeatureDetector::create(THRESHOLD);
+    vector<KeyPoint> &kp = mCurrentImage->GetKPAt(0);
+
+    // TODO: Heuristics using an image pyramid, use low resolution and work up the pyrimad when accuracy fails.
+    detector->detect(mCurrentImage->GetGrayAt(0), kp);
 }
 
 

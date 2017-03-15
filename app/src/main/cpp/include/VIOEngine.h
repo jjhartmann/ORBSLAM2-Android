@@ -22,7 +22,8 @@ private:
     VIOImage *mPreviousImage; // OWN
     VIOImage *mPendingImage;  // OWN
 
-
+    // Private Methods
+    void DetectFeatures(VIOImage *in_vioImg);
 
 
     // Static Methods

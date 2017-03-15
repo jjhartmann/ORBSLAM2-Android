@@ -37,8 +37,12 @@ void VIOImage::CreateOctaves(Mat &imgAddr) {
     resize(mOriginalImage, newImg, Size(w, h));
     mImages.push_back(newImg);
 
+    // Convert Color
     cvtColor(newImg, newImg, COLOR_BGR2GRAY);
     mGrayImgs.push_back(newImg);
+
+    // Push empty array
+    mKPArray.push_back(vector<KeyPoint>());
 
     for (int i = 0; i < OCTAVE_COUNT - 1; ++i){
         Mat dstImg;
@@ -47,13 +51,16 @@ void VIOImage::CreateOctaves(Mat &imgAddr) {
 
         cvtColor(dstImg, dstImg, COLOR_BGR2GRAY);
         mGrayImgs.push_back(newImg);
+
+        mKPArray.push_back(vector<KeyPoint>());
     }
 }
 
 
 
 void VIOImage::CleanOctaves() {
-    // Mat owns data?? Will auto release when unreferenced.
+    // Mat owns data?? Will auto release when unreferenced. Vecotrs?
+    mOriginalImage.release();
 }
 
 unsigned int VIOImage::GetOctaveCount() {
@@ -62,4 +69,10 @@ unsigned int VIOImage::GetOctaveCount() {
 
 bool VIOImage::isImageLoaded() {
    return !mOriginalImage.empty();
+}
+
+vector<KeyPoint>& VIOImage::GetKPAt(int i){
+    if (i < 0 || i >= OCTAVE_COUNT)
+        throw INTEGER_OUT_OF_RANGE;
+    return mKPArray[i];
 }
