@@ -14,7 +14,7 @@ namespace SARVIOFusion {
         INTEGER_OUT_OF_RANGE = 0
     } VIOERROR;
 
-    static int MIN_FEATURES_TO_TRACK = 200;
+    static int MIN_FEATURES_TO_TRACK = 50;
 
 
     typedef std::chrono::high_resolution_clock clock;
@@ -34,6 +34,20 @@ namespace SARVIOFusion {
         double dy;
         double dz;
         clock::time_point timePoint;
+
+        TranslationVector(){}
+        TranslationVector(double in_x, double in_y, double in_z){
+            dx = in_x;
+            dy = in_y;
+            dz = in_z;
+        }
+
+        void reset() {
+            dx = 0;
+            dy = 0;
+            dz = 0;
+            timePoint = GetTimeStamp();
+        }
     };
 }
 

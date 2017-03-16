@@ -47,17 +47,16 @@ void VIOEngine::ProcessImage(cv::Mat &inputImg) {
     mCurrentImage->CreateOctaves(inputImg);
 
     // Detect fast features and store them in array.
-    DetectFeatures(mCurrentImage);
-
-    // Check if buffers are filled.
-    if (!IsReady()){
+    if (mPoseEstimation.IsReset()) {
+        DetectFeatures(mCurrentImage);
+        mPoseEstimation.AddTranslationVector(TranslationVector(0, 0, 0));
         return;
     }
 
-    // Check for for minimum features to track
-    if (mCurrentImage->GetKPAt(0).size() < MIN_FEATURES_TO_TRACK ||
-        mPreviousImage->GetKPAt(0).size() < MIN_FEATURES_TO_TRACK)
-        return;
+    // Check if buffers are filled.
+//    if (!IsReady()){
+//        return;
+//    }
 
     // Track and store rotation and translation vectors
     TrackFeatures(mCurrentImage, mPreviousImage);
@@ -85,11 +84,12 @@ void VIOEngine::PrintPoint(cv::Mat &in_img, int xOffset, int yOffSet) {
 
     if (DEBUG_MODE) {
         char text[100];
-        rectangle(in_img, Point(10, 30), Point(550, 50), CV_RGB(0, 0, 0), CV_FILLED);
+        rectangle(in_img, Point(10, 30), Point(590, 50), CV_RGB(0, 0, 0), CV_FILLED);
         sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", mCurrentPose_t_f.at<double>(0),
                 mCurrentPose_t_f.at<double>(1), mCurrentPose_t_f.at<double>(2));
         putText(in_img, text, Point(10, 50), FONT_HERSHEY_PLAIN, 1, Scalar::all(255), 1, 8);
 
+        rectangle(in_img, Point(10, 60), Point(590, 100), CV_RGB(0, 0, 0), CV_FILLED);
         sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm",integratedPose.dx,
                 integratedPose.dy, integratedPose.dz);
         putText(in_img, text, Point(10, 80), FONT_HERSHEY_PLAIN, 1, Scalar::all(255), 1, 8);
@@ -135,16 +135,14 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
     vector<Point2f> &kp_1 = img_1->GetKPP2FAt(0);
     vector<Point2f> &kp_2 = img_2->GetKPP2FAt(0);
 
+    // Check for for  features to track
     CalcOpticalFlow(grayImg_1, grayImg_2, kp_1, kp_2, mTrackingStatus, mTrackingError);
-//    calcOpticalFlowPyrLK(grayImg_2,
-//                         grayImg_1,
-//                         kp_2,
-//                         kp_1,
-//                         mTrackingStatus,
-//                         mTrackingError,
-//                         winSize,
-//                         3,
-//                         termcrit);
+
+    // If features being tracked fall below some threshold, Restart Flow
+    if (mPreviousImage->GetKPAt(0).size() < MIN_FEATURES_TO_TRACK) {
+        DetectFeatures(mPreviousImage);
+        CalcOpticalFlow(grayImg_1, grayImg_2, kp_1, kp_2, mTrackingStatus, mTrackingError);
+    }
 
     // TODO: Obtain these from camera calibration once implemented.
     double focalLength = 467;

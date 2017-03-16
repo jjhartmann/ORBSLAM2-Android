@@ -16,11 +16,15 @@ public:
     ~VOPose();
 
     void AddTranslationVector(cv::Mat in_t);
+    void AddTranslationVector(SARVIOFusion::TranslationVector in_t);
     SARVIOFusion::TranslationVector GetIntegratedTranslation();
+    void Reset();
+    bool IsReset();
 private:
 
+    // Vars
+    bool mIsReset = true;
     // Data structure that houses translation and timestamp
-
     std::vector<SARVIOFusion::TranslationVector> mTranslationArray;
 
     // Current instance of R and t.
