@@ -38,9 +38,10 @@ private:
     void TrackFeatures(VIOImage *img_1, VIOImage *img_2);
     void CalcOpticalFlow(cv::Mat img_1,
                          cv::Mat img_2,
-                         std::vector<cv::Point2d> &points_1,
+                         std::vector<cv::Point2f> &points_1,
                          std::vector<cv::Point2f> &points_2,
-                         std::vector<uchar> &status);
+                         std::vector<uchar> &status,
+                         std::vector<float> &err);
 
 
     // Static Methods

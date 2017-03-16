@@ -135,15 +135,16 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
     vector<Point2f> &kp_1 = img_1->GetKPP2FAt(0);
     vector<Point2f> &kp_2 = img_2->GetKPP2FAt(0);
 
-    calcOpticalFlowPyrLK(grayImg_2,
-                         grayImg_1,
-                         kp_1,
-                         kp_2,
-                         mTrackingStatus,
-                         mTrackingError,
-                         winSize,
-                         3,
-                         termcrit);
+    CalcOpticalFlow(grayImg_1, grayImg_2, kp_1, kp_2, mTrackingStatus, mTrackingError);
+//    calcOpticalFlowPyrLK(grayImg_2,
+//                         grayImg_1,
+//                         kp_2,
+//                         kp_1,
+//                         mTrackingStatus,
+//                         mTrackingError,
+//                         winSize,
+//                         3,
+//                         termcrit);
 
     // TODO: Obtain these from camera calibration once implemented.
     double focalLength = 467;
@@ -173,9 +174,60 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
     mPoseEstimation.AddTranslationVector(mCurrentPose_t_f);
 }
 
-void VIOEngine::CalcOpticalFlow(cv::Mat img_1, cv::Mat img_2, std::vector<cv::Point2d> &points_1,
-                                std::vector<cv::Point2f> &points_2, std::vector<uchar> &status) {
+void VIOEngine::CalcOpticalFlow(cv::Mat img_1,
+                                cv::Mat img_2,
+                                std::vector<cv::Point2f> &points_1,
+                                std::vector<cv::Point2f> &points_2,
+                                std::vector<uchar> &status,
+                                std::vector<float> &err) {
 
+    // Set Params: TODO: Pull these from a calibration class?
+    Size winSize = Size(21 ,21);
+    TermCriteria termcrit = TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01);
+    int maxLevel = 3;
+    int oFlags = 0;
+    double minEgienValue = 0.001;
+
+    calcOpticalFlowPyrLK(img_2,
+                         img_1,
+                         points_2,
+                         points_1,
+                         status,
+                         err,
+                         winSize,
+                         maxLevel,
+                         termcrit,
+                         oFlags,
+                         minEgienValue);
+
+    // Remove bad or untracked features.
+    int newSize = 0;
+    for (int i = 0; i < status.size(); ++i) {
+        Point2f pt = points_1[i];
+        if (status[i] == 0 || pt.x < 0 || pt.y < 0) {
+            if (pt.x < 0 || pt.y < 0){
+                status[i] = 0;
+            }
+        } else {
+            newSize++;
+        }
+    }
+
+    vector<cv::Point2f> newPoints_1(newSize, Point2f(0.0, 0.0));
+    vector<cv::Point2f> newPoints_2(newSize, Point2f(0.0, 0.0));
+
+    int nIndex = 0;
+    for (int i = 0; i < status.size(); ++i) {
+        if (status[i] > 0) {
+            newPoints_1[nIndex] = points_1[i];
+            newPoints_2[nIndex] = points_2[i];
+            nIndex++;
+        }
+    }
+
+    // Copy to in out vectors.
+    points_1 = newPoints_1;
+    points_2 = newPoints_2;
 }
 
 
