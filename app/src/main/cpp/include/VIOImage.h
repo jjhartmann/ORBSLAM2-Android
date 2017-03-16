@@ -32,7 +32,7 @@ public:
         return mImages[i];
     }
 
-    inline cv::Mat& GetGrayAt(int i) {
+    inline cv::Mat& GetGrayAt(int i = 0) {
         if (i < 0 || i >= OCTAVE_COUNT)
             throw SARVIOFusion::INTEGER_OUT_OF_RANGE;
 
@@ -43,14 +43,15 @@ public:
     unsigned int GetOctaveCount();
     unsigned int GetWidth();
     unsigned int GetHeight();
+    double GetScale(int i = 0);
     // Set
-    std::vector<cv::KeyPoint>& GetKPAt(int i);
-    std::vector<cv::Point2f>& GetKPP2FAt(int i);
+    std::vector<cv::KeyPoint>& GetKPAt(int i = 0);
+    std::vector<cv::Point2f>& GetKPP2FAt(int i = 0);
 
 private:
     // Member Variables
     unsigned int OCTAVE_COUNT = 4;
-    double SIZE_REDUCED = 0.3f;
+    double SIZE_REDUCED = 0.5f;
     unsigned int ORIGINAL_WIDTH = 0;
     unsigned int ORIGINAL_HEIGHT = 0;
     std::vector<cv::Mat> mGrayImgs;

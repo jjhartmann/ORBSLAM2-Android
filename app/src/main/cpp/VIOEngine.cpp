@@ -47,23 +47,27 @@ void VIOEngine::ProcessImage(cv::Mat &inputImg) {
     mCurrentImage->CreateOctaves(inputImg);
 
     // Detect fast features and store them in array.
-    if (mPoseEstimation.IsReset()) {
+    if (!IsReady()) {
+        // Init Pose
+        //mPoseEstimation.Reset();
+
+        // Detect features in current image
         DetectFeatures(mCurrentImage);
+
+        // Add origin to pose estimations.
         mPoseEstimation.AddTranslationVector(TranslationVector(0, 0, 0));
         return;
     }
-
-    // Check if buffers are filled.
-//    if (!IsReady()){
-//        return;
-//    }
 
     // Track and store rotation and translation vectors
     TrackFeatures(mCurrentImage, mPreviousImage);
 }
 
 bool VIOEngine::IsReady() {
-    return mCurrentImage->isImageLoaded() && mPreviousImage->isImageLoaded();
+    return !mPoseEstimation.IsReset() &&
+            mPreviousImage->isImageLoaded() &&
+            !mPreviousImage->GetKPP2FAt().empty() &&
+            mPreviousImage->GetKPP2FAt().size() > MIN_FEATURES_TO_TRACK;
 }
 
 void VIOEngine::ShiftBuffers() {
@@ -79,28 +83,59 @@ void VIOEngine::PrintPoint(cv::Mat &in_img, int xOffset, int yOffSet) {
 
     TranslationVector integratedPose = mPoseEstimation.GetIntegratedTranslation();
     vector<TranslationVector> &mWalk = mPoseEstimation.GetRefToTranslationArray();
-    if (DEBUG_MODE) {
-        double ix = xOffset, iy = yOffSet;
-        for (TranslationVector v : mWalk) {
-            ix += v.dx;
-            iy += v.dy;
-            circle(in_img, Point(ix, iy) ,1, CV_RGB(255,0,0), 2);
+
+    double ix = xOffset, iy = yOffSet, iz = 0;
+    int current_track_count = 0;
+    int r = 255, g = 255, b = 0;
+    for (TranslationVector v : mWalk) {
+        if (v.mRetrackIndex != current_track_count){
+            current_track_count = v.mRetrackIndex;
+            r = (int)((13 % r) * ix) % 255;
+            g = (int)((13 % g) * iy) % 255;
+            ix = xOffset;
+            iy = yOffSet;
+            iz = 0;
         }
+        ix += v.dx;
+        iy += v.dy;
+        iz += v.dz;
+        circle(in_img, Point(ix, iy) ,1, CV_RGB(r,g,b), 2);
+    }
 
-        int x = int(integratedPose.dx) + xOffset; // X
-        int y = int(integratedPose.dy) + yOffSet; // Y
-        circle(in_img, Point(x, y) ,1, CV_RGB(255,255,0), 2);
+    int x = int(integratedPose.dx) + xOffset; // X
+    int y = int(integratedPose.dy) + yOffSet; // Y
+    circle(in_img, Point(x, y) ,1, CV_RGB(255,255,0), 2);
 
-        char text[100];
-        rectangle(in_img, Point(10, 30), Point(590, 50), CV_RGB(0, 0, 0), CV_FILLED);
-        sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", mCurrentPose_t_f.at<double>(0),
-                mCurrentPose_t_f.at<double>(1), mCurrentPose_t_f.at<double>(2));
-        putText(in_img, text, Point(10, 50), FONT_HERSHEY_PLAIN, 1, Scalar::all(255), 1, 8);
+    // Print Text to screen
+    char text[100];
+    rectangle(in_img, Point(10, 30), Point(590, 50), CV_RGB(0, 0, 0), CV_FILLED);
+    sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", mCurrentPose_t_f.at<double>(0),
+            mCurrentPose_t_f.at<double>(1), mCurrentPose_t_f.at<double>(2));
+    putText(in_img, text, Point(10, 50), FONT_HERSHEY_PLAIN, 1, Scalar::all(255), 1, 8);
 
-        rectangle(in_img, Point(10, 60), Point(590, 100), CV_RGB(0, 0, 0), CV_FILLED);
-        sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm",integratedPose.dx,
-                integratedPose.dy, integratedPose.dz);
-        putText(in_img, text, Point(10, 80), FONT_HERSHEY_PLAIN, 1, Scalar::all(255), 1, 8);
+    rectangle(in_img, Point(10, 60), Point(590, 80), CV_RGB(0, 0, 0), CV_FILLED);
+    sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm",integratedPose.dx,
+            integratedPose.dy, integratedPose.dz);
+    putText(in_img, text, Point(10, 80), FONT_HERSHEY_PLAIN, 1, Scalar::all(255), 1, 8);
+
+    rectangle(in_img, Point(10, 90), Point(590, 110), CV_RGB(0, 0, 0), CV_FILLED);
+    sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm",ix, iy, iz);
+    putText(in_img, text, Point(10, 110), FONT_HERSHEY_PLAIN, 1, Scalar::all(255), 1, 8);
+
+
+    // Print Features
+    double scale = mCurrentImage->GetScale();
+    vector<Point2f> kp_1 = mCurrentImage->GetKPP2FAt();
+    vector<Point2f> kp_2 = mPreviousImage->GetKPP2FAt();
+
+    for (int i = 0; i < kp_1.size(); ++i) {
+        int prev_x = (int)scale * kp_2[i].x;
+        int prev_y = (int)scale * kp_2[i].y;
+        int curr_x = (int)scale * kp_1[i].x;
+        int curr_y = (int)scale * kp_1[i].y;
+        circle(in_img, Point(prev_x, prev_y), 10, Scalar(255,0,0,255));
+        circle(in_img, Point(curr_x, curr_y), 10, Scalar(0,255,0,255));
+        arrowedLine(in_img, Point(prev_x, prev_y), Point(curr_x, curr_y), Scalar(255,255,255), 1);
     }
 
 
@@ -142,15 +177,17 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
 
     vector<Point2f> &kp_1 = img_1->GetKPP2FAt(0);
     vector<Point2f> &kp_2 = img_2->GetKPP2FAt(0);
+    kp_1.clear();
 
     // Check for for  features to track
     CalcOpticalFlow(grayImg_1, grayImg_2, kp_1, kp_2, mTrackingStatus, mTrackingError);
 
     // If features being tracked fall below some threshold, Restart Flow
-    if (mPreviousImage->GetKPAt(0).size() < MIN_FEATURES_TO_TRACK) {
+    if (kp_2.size() < MIN_FEATURES_TO_TRACK || kp_2.size() < MIN_FEATURES_TO_TRACK) {
         DetectFeatures(mPreviousImage);
+        kp_1.clear();
         CalcOpticalFlow(grayImg_1, grayImg_2, kp_1, kp_2, mTrackingStatus, mTrackingError);
-        if (mPreviousImage->GetKPAt(0).size() < MIN_FEATURES_TO_TRACK) {
+        if (kp_2.size() < MIN_FEATURES_TO_TRACK || kp_2.size() < MIN_FEATURES_TO_TRACK) {
             mPoseEstimation.Reset();
             return;
         }

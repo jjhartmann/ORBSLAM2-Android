@@ -99,8 +99,13 @@ unsigned int VIOImage::GetWidth() {
     return 0;
 }
 
+double VIOImage::GetScale(int i) {
+    return 1 / SIZE_REDUCED ;
+}
+
 std::vector<cv::Point2f> &VIOImage::GetKPP2FAt(int i) {
     if (i < 0 || i >= OCTAVE_COUNT)
         throw INTEGER_OUT_OF_RANGE;
     return mKPPointFArray[i];
 }
+

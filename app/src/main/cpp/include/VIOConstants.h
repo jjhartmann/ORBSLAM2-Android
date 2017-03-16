@@ -14,7 +14,7 @@ namespace SARVIOFusion {
         INTEGER_OUT_OF_RANGE = 0
     } VIOERROR;
 
-    static int MIN_FEATURES_TO_TRACK = 50;
+    static int MIN_FEATURES_TO_TRACK = 400;
 
 
     typedef std::chrono::high_resolution_clock clock;

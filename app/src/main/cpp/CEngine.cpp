@@ -34,10 +34,12 @@ Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_VisualOdometry(JNIEnv *env, jo
 
     // Process image.
     mVIOEngineAddr->ProcessImage(cImg);
-    mVIOEngineAddr->ShiftBuffers();
-
-    // Print Results to image.
+#if DEBUG_MODE
     mVIOEngineAddr->PrintPoint(cImg, cImg.cols/2, cImg.rows/2);
+#endif
+
+    // Shift image buffers
+    mVIOEngineAddr->ShiftBuffers();
 }
 
 JNIEXPORT void JNICALL
