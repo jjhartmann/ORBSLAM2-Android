@@ -78,11 +78,19 @@ void VIOEngine::PrintPoint(cv::Mat &in_img, int xOffset, int yOffSet) {
         return;
 
     TranslationVector integratedPose = mPoseEstimation.GetIntegratedTranslation();
-    int x = int(integratedPose.dx) + 640; // X
-    int y = int(integratedPose.dy) + 360; // Y
-    circle(in_img, Point(x, y) ,1, CV_RGB(255,0,0), 2);
-
+    vector<TranslationVector> &mWalk = mPoseEstimation.GetRefToTranslationArray();
     if (DEBUG_MODE) {
+        double ix = xOffset, iy = yOffSet;
+        for (TranslationVector v : mWalk) {
+            ix += v.dx;
+            iy += v.dy;
+            circle(in_img, Point(ix, iy) ,1, CV_RGB(255,0,0), 2);
+        }
+
+        int x = int(integratedPose.dx) + xOffset; // X
+        int y = int(integratedPose.dy) + yOffSet; // Y
+        circle(in_img, Point(x, y) ,1, CV_RGB(255,255,0), 2);
+
         char text[100];
         rectangle(in_img, Point(10, 30), Point(590, 50), CV_RGB(0, 0, 0), CV_FILLED);
         sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", mCurrentPose_t_f.at<double>(0),
@@ -142,6 +150,10 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
     if (mPreviousImage->GetKPAt(0).size() < MIN_FEATURES_TO_TRACK) {
         DetectFeatures(mPreviousImage);
         CalcOpticalFlow(grayImg_1, grayImg_2, kp_1, kp_2, mTrackingStatus, mTrackingError);
+        if (mPreviousImage->GetKPAt(0).size() < MIN_FEATURES_TO_TRACK) {
+            mPoseEstimation.Reset();
+            return;
+        }
     }
 
     // TODO: Obtain these from camera calibration once implemented.
@@ -151,6 +163,7 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
     // Get the essential matrix and recover pose
     Mat E, R, t, mask;
     E = findEssentialMat(kp_1, kp_2, focalLength, pp, RANSAC, 0.999, 1.0, mask);
+    if (E.cols != 3 && E.rows != 3){return; }
     recoverPose(E,kp_1, kp_2, R, t, focalLength, pp, mask);
 
     // TODO: Calculate the absolute scale
