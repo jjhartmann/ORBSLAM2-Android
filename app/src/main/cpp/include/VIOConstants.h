@@ -33,13 +33,15 @@ namespace SARVIOFusion {
         double dx;
         double dy;
         double dz;
+        uint mRetrackIndex;
         clock::time_point timePoint;
 
-        TranslationVector(){}
+        TranslationVector(): dx(0), dy(0), dz(0), mRetrackIndex(0) {}
         TranslationVector(double in_x, double in_y, double in_z){
             dx = in_x;
             dy = in_y;
             dz = in_z;
+            mRetrackIndex = 0;
         }
 
         void reset() {

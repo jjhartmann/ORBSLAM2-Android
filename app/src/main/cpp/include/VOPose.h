@@ -18,12 +18,15 @@ public:
     void AddTranslationVector(cv::Mat in_t);
     void AddTranslationVector(SARVIOFusion::TranslationVector in_t);
     SARVIOFusion::TranslationVector GetIntegratedTranslation();
+    std::vector<SARVIOFusion::TranslationVector> &GetRefToTranslationArray();
+
     void Reset();
     bool IsReset();
 private:
 
     // Vars
     bool mIsReset = true;
+    unsigned  int mRetrackCount = 0;
     // Data structure that houses translation and timestamp
     std::vector<SARVIOFusion::TranslationVector> mTranslationArray;
 
@@ -31,6 +34,10 @@ private:
     SARVIOFusion::TranslationVector mIntegratedT;
     SARVIOFusion::TranslationVector mCurrentT;
     cv::Mat mCurrentR;
+
+    // Private Methods
+
+
 };
 
 
