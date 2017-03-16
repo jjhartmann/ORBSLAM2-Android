@@ -75,7 +75,7 @@ void VIOEngine::ShiftBuffers() {
 }
 
 void VIOEngine::PrintPoint(cv::Mat &in_img, int xOffset, int yOffSet) {
-    if (mCurrentPose_t_f.empty() || mCurrentPose_R_f.empty())
+    if (!IsReady())
         return;
 
     TranslationVector integratedPose = mPoseEstimation.GetIntegratedTranslation();
@@ -125,11 +125,17 @@ void VIOEngine::PrintPoint(cv::Mat &in_img, int xOffset, int yOffSet) {
     vector<Point2f> kp_1 = mCurrentImage->GetKPP2FAt();
     vector<Point2f> kp_2 = mPreviousImage->GetKPP2FAt();
 
+    bool ecept = false;
     for (int i = 0; i < kp_1.size(); ++i) {
         int prev_x = (int)scale * kp_2[i].x;
         int prev_y = (int)scale * kp_2[i].y;
         int curr_x = (int)scale * kp_1[i].x;
         int curr_y = (int)scale * kp_1[i].y;
+
+        if (prev_x < 0 || prev_y < 0 ||  prev_x >= mCurrentImage->GetOriginalWidth() || prev_y >= mCurrentImage->GetOriginalHeight()){
+            ecept = true;
+        }
+
         circle(in_img, Point(prev_x, prev_y), 10, Scalar(255,0,0,255));
         circle(in_img, Point(curr_x, curr_y), 10, Scalar(0,255,0,255));
         arrowedLine(in_img, Point(prev_x, prev_y), Point(curr_x, curr_y), Scalar(255,255,255), 1);
@@ -161,10 +167,6 @@ void VIOEngine::DetectFeatures(VIOImage *in_vioImg) {
 
 void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
 
-    // Set Params
-    Size winSize = Size(21 ,21);
-    TermCriteria termcrit = TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01);
-
     // Calc optical flow from FAST points
     Mat &grayImg_1 = img_1->GetGrayAt(0);
     uchar type_1 = grayImg_1.type() & CV_MAT_DEPTH_MASK;
@@ -176,22 +178,29 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
     vector<Point2f> &kp_2 = img_2->GetKPP2FAt(0);
     kp_1.clear();
 
+    // TODO: Optimise based on where furthes feature is.
+    if (kp_2.size() < AVG_FEATURES_TO_TRACK) {
+        DetectFeatures(mPreviousImage);
+    }
+
     // Check for for  features to track
     CalcOpticalFlow(grayImg_1, grayImg_2, kp_1, kp_2, mTrackingStatus, mTrackingError);
 
     // If features being tracked fall below some threshold, Restart Flow
-    if (kp_2.size() < MIN_FEATURES_TO_TRACK || kp_2.size() < MIN_FEATURES_TO_TRACK) {
+    if (kp_2.size() < MIN_FEATURES_TO_TRACK || kp_1.size() < MIN_FEATURES_TO_TRACK) {
         DetectFeatures(mPreviousImage);
         kp_1.clear();
         CalcOpticalFlow(grayImg_1, grayImg_2, kp_1, kp_2, mTrackingStatus, mTrackingError);
         if (kp_2.size() < MIN_FEATURES_TO_TRACK || kp_2.size() < MIN_FEATURES_TO_TRACK) {
+            mCurrentImage->CleanOctaves();
+            mPreviousImage->CleanOctaves();
             mPoseEstimation.Reset();
             return;
         }
     }
 
     // TODO: Obtain these from camera calibration once implemented.
-    double focalLength = 467;
+    double focalLength = 23;
     cv::Point2d pp(img_1->GetWidth()/2, img_1->GetHeight()/2);
 
     // Get the essential matrix and recover pose
@@ -246,11 +255,13 @@ void VIOEngine::CalcOpticalFlow(cv::Mat img_1,
                          minEgienValue);
 
     // Remove bad or untracked features.
+    int w = mCurrentImage->GetWidth();
+    int h = mCurrentImage->GetHeight();
     int newSize = 0;
     for (int i = 0; i < status.size(); ++i) {
         Point2f pt = points_1[i];
-        if (status[i] == 0 || pt.x < 0 || pt.y < 0) {
-            if (pt.x < 0 || pt.y < 0){
+        if (status[i] == 0 || pt.x < 0 || pt.y < 0 || pt.x >= w || pt.y >= h) {
+            if (pt.x < 0 || pt.y < 0 ||  pt.x >= w || pt.y >= h){
                 status[i] = 0;
             }
         } else {

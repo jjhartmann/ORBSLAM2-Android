@@ -15,6 +15,7 @@ namespace SARVIOFusion {
     } VIOERROR;
 
     static int MIN_FEATURES_TO_TRACK = 400;
+    static int AVG_FEATURES_TO_TRACK = 1000;
 
 
     typedef std::chrono::high_resolution_clock clock;
