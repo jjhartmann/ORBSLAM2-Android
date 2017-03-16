@@ -87,15 +87,15 @@ vector<KeyPoint>& VIOImage::GetKPAt(int i){
     return mKPArray[i];
 }
 
-unsigned int VIOImage::GetHeight() {
+unsigned int VIOImage::GetHeight(int i) {
     if (mGrayImgs.size() > 0)
-        return mGrayImgs[0].rows;
+        return mGrayImgs[i].rows;
     return 0;
 }
 
-unsigned int VIOImage::GetWidth() {
+unsigned int VIOImage::GetWidth(int i) {
     if (mGrayImgs.size() > 0)
-        return mGrayImgs[0].cols;
+        return mGrayImgs[i].cols;
     return 0;
 }
 
@@ -107,5 +107,13 @@ std::vector<cv::Point2f> &VIOImage::GetKPP2FAt(int i) {
     if (i < 0 || i >= OCTAVE_COUNT)
         throw INTEGER_OUT_OF_RANGE;
     return mKPPointFArray[i];
+}
+
+unsigned int VIOImage::GetOriginalHeight() {
+    return ORIGINAL_HEIGHT;
+}
+
+unsigned int VIOImage::GetOriginalWidth() {
+    return ORIGINAL_WIDTH;
 }
 

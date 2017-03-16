@@ -48,9 +48,6 @@ void VIOEngine::ProcessImage(cv::Mat &inputImg) {
 
     // Detect fast features and store them in array.
     if (!IsReady()) {
-        // Init Pose
-        //mPoseEstimation.Reset();
-
         // Detect features in current image
         DetectFeatures(mCurrentImage);
 
