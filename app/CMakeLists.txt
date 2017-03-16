@@ -22,7 +22,8 @@ add_library( native-lib
              src/main/cpp/native-lib.cpp
              src/main/cpp/CEngine.cpp
              src/main/cpp/VIOImage.cpp
-             src/main/cpp/VIOEngine.cpp)
+             src/main/cpp/VIOEngine.cpp
+             src/main/cpp/VOPose.cpp)
 
 ####################################################################################################
 ## Open CV 3.2

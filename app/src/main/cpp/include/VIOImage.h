@@ -27,14 +27,14 @@ public:
     // Inline functions for fast reterival.
     inline cv::Mat& operator[](int i) {
         if (i < 0 || i >= OCTAVE_COUNT)
-            throw INTEGER_OUT_OF_RANGE;
+            throw SARVIOFusion::INTEGER_OUT_OF_RANGE;
 
         return mImages[i];
     }
 
     inline cv::Mat& GetGrayAt(int i) {
         if (i < 0 || i >= OCTAVE_COUNT)
-            throw INTEGER_OUT_OF_RANGE;
+            throw SARVIOFusion::INTEGER_OUT_OF_RANGE;
 
         return mGrayImgs[i];
     }

@@ -10,6 +10,7 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/video/tracking.hpp>
 
+using namespace SARVIOFusion;
 using namespace std;
 using namespace cv;
 
@@ -52,6 +53,11 @@ void VIOEngine::ProcessImage(cv::Mat &inputImg) {
     if (!IsReady()){
         return;
     }
+
+    // Check for for minimum features to track
+    if (mCurrentImage->GetKPAt(0).size() < MIN_FEATURES_TO_TRACK ||
+        mPreviousImage->GetKPAt(0).size() < MIN_FEATURES_TO_TRACK)
+        return;
 
     // Track and store rotation and translation vectors
     TrackFeatures(mCurrentImage, mPreviousImage);

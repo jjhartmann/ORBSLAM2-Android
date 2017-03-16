@@ -7,6 +7,7 @@
 
 
 #include "VIOImage.h"
+#include "VOPose.h"
 
 class VIOEngine {
 public:
@@ -29,6 +30,7 @@ private:
     // TODO: Refactor camera pose information from optical flow
     cv::Mat mCurrentPose_R_f;
     cv::Mat mCurrentPose_t_f;
+    VOPose mPoseEstimation;
 
     // Private Methods
     void DetectFeatures(VIOImage *in_vioImg);

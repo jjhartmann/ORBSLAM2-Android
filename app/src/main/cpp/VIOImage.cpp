@@ -5,6 +5,7 @@
 #include "VIOImage.h"
 using namespace cv;
 using namespace std;
+using namespace SARVIOFusion;
 
 VIOImage::VIOImage(const unsigned int oc,
                    double sr,
