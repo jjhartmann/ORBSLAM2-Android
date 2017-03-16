@@ -103,18 +103,9 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
     // Calc optical flow from FAST points
     Mat &grayImg_1 = img_1->GetGrayAt(0);
     uchar type_1 = grayImg_1.type() & CV_MAT_DEPTH_MASK;
-    int res_1 = grayImg_1.checkVector(2, CV_32F, true);
-    res_1 = grayImg_1.checkVector(2, CV_8S, true);
-    res_1 = grayImg_1.checkVector(2, CV_8U, true);
-    res_1 = grayImg_1.checkVector(2, CV_16S, true);
-    res_1 = grayImg_1.checkVector(2, CV_16U, true);
-    res_1 = grayImg_1.checkVector(2, CV_32S, true);
-    res_1 = grayImg_1.checkVector(2, CV_64F, true);
-
 
     Mat &grayImg_2 = img_2->GetGrayAt(0);
     uchar type_2 = grayImg_1.type() & CV_MAT_DEPTH_MASK;
-    int res_2 = grayImg_2.checkVector(2, CV_32F, true);
 
     vector<Point2f> &kp_1 = img_1->GetKPP2FAt(0);
     vector<Point2f> &kp_2 = img_2->GetKPP2FAt(0);
