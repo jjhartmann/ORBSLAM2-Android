@@ -74,6 +74,31 @@ void VIOEngine::ShiftBuffers() {
     //VIOEngine::Swap(mCurrentImage, mPreviousImage);
 }
 
+void VIOEngine::PrintPoint(cv::Mat &in_img, int xOffset, int yOffSet) {
+    if (mCurrentPose_t_f.empty() || mCurrentPose_R_f.empty())
+        return;
+
+    TranslationVector integratedPose = mPoseEstimation.GetIntegratedTranslation();
+    int x = int(integratedPose.dx) + 640; // X
+    int y = int(integratedPose.dy) + 360; // Y
+    circle(in_img, Point(x, y) ,1, CV_RGB(255,0,0), 2);
+
+    if (DEBUG_MODE) {
+        char text[100];
+        rectangle(in_img, Point(10, 30), Point(550, 50), CV_RGB(0, 0, 0), CV_FILLED);
+        sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", mCurrentPose_t_f.at<double>(0),
+                mCurrentPose_t_f.at<double>(1), mCurrentPose_t_f.at<double>(2));
+        putText(in_img, text, Point(10, 50), FONT_HERSHEY_PLAIN, 1, Scalar::all(255), 1, 8);
+
+        sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm",integratedPose.dx,
+                integratedPose.dy, integratedPose.dz);
+        putText(in_img, text, Point(10, 80), FONT_HERSHEY_PLAIN, 1, Scalar::all(255), 1, 8);
+    }
+
+
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Private Methods
 /// : TODO: Refactor this into own class?
@@ -145,20 +170,11 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
     mCurrentPose_R_f = R_f.clone();
     mCurrentPose_t_f = t_f.clone();
 
+    mPoseEstimation.AddTranslationVector(mCurrentPose_t_f);
 }
 
-void VIOEngine::PrintPoint(cv::Mat &in_img, int xOffset, int yOffSet) {
-    if (mCurrentPose_t_f.empty() || mCurrentPose_R_f.empty())
-        return;
-
-    int x = int(mCurrentPose_t_f.at<double>(0)) + 640; // X
-    int y = int(mCurrentPose_t_f.at<double>(2)) + 360; // Y
-    circle(in_img, Point(x, y) ,1, CV_RGB(255,0,0), 2);
-
-    char text[100];
-    rectangle(in_img, Point(10, 30), Point(550, 50), CV_RGB(0,0,0), CV_FILLED);
-    sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", mCurrentPose_t_f.at<double>(0), mCurrentPose_t_f.at<double>(1), mCurrentPose_t_f.at<double>(2));
-    putText(in_img, text, Point(10, 50), FONT_HERSHEY_PLAIN, 1, Scalar::all(255), 1, 8);
+void VIOEngine::CalcOpticalFlow(cv::Mat img_1, cv::Mat img_2, std::vector<cv::Point2d> &points_1,
+                                std::vector<cv::Point2f> &points_2, std::vector<uchar> &status) {
 
 }
 

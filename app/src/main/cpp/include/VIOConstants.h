@@ -5,6 +5,9 @@
 #ifndef VISUALINERTIALODOMETRY_ANDROID_UW_SAR_2_VIOCONSTANTS_H
 #define VISUALINERTIALODOMETRY_ANDROID_UW_SAR_2_VIOCONSTANTS_H
 
+// Useful macros to use in code.
+#define DEBUG_MODE 1
+
 #include <chrono>
 namespace SARVIOFusion {
     static enum ERROR_CODE {

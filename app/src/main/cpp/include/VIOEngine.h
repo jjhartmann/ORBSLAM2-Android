@@ -8,6 +8,7 @@
 
 #include "VIOImage.h"
 #include "VOPose.h"
+#include "VIOConstants.h"
 
 class VIOEngine {
 public:
@@ -35,6 +36,11 @@ private:
     // Private Methods
     void DetectFeatures(VIOImage *in_vioImg);
     void TrackFeatures(VIOImage *img_1, VIOImage *img_2);
+    void CalcOpticalFlow(cv::Mat img_1,
+                         cv::Mat img_2,
+                         std::vector<cv::Point2d> &points_1,
+                         std::vector<cv::Point2f> &points_2,
+                         std::vector<uchar> &status);
 
 
     // Static Methods
