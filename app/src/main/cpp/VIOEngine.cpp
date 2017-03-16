@@ -71,9 +71,7 @@ void VIOEngine::ShiftBuffers() {
     // Clean and swap buffers.
     mPreviousImage->CleanOctaves();
     std::swap(mCurrentImage, mPreviousImage);
-    //VIOEngine::Swap(mCurrentImage, mPreviousImage);
 }
-
 void VIOEngine::PrintPoint(cv::Mat &in_img, int xOffset, int yOffSet) {
     if (!IsReady())
         return;
@@ -186,6 +184,7 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
     // Check for for  features to track
     CalcOpticalFlow(grayImg_1, grayImg_2, kp_1, kp_2, mTrackingStatus, mTrackingError);
 
+    // TODO: have tracking fail only after a number of set failures. This can be accomplished thorugh a member var that holds the number of dropped frames.
     // If features being tracked fall below some threshold, Restart Flow
     if (kp_2.size() < MIN_FEATURES_TO_TRACK || kp_1.size() < MIN_FEATURES_TO_TRACK) {
         DetectFeatures(mPreviousImage);
@@ -193,7 +192,6 @@ void VIOEngine::TrackFeatures(VIOImage *img_1, VIOImage *img_2) {
         CalcOpticalFlow(grayImg_1, grayImg_2, kp_1, kp_2, mTrackingStatus, mTrackingError);
         if (kp_2.size() < MIN_FEATURES_TO_TRACK || kp_2.size() < MIN_FEATURES_TO_TRACK) {
             mCurrentImage->CleanOctaves();
-            mPreviousImage->CleanOctaves();
             mPoseEstimation.Reset();
             return;
         }
@@ -237,10 +235,10 @@ void VIOEngine::CalcOpticalFlow(cv::Mat img_1,
 
     // Set Params: TODO: Pull these from a calibration class?
     Size winSize = Size(21 ,21);
-    TermCriteria termcrit = TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01);
+    TermCriteria termcrit = TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 50, 0.01);
     int maxLevel = 3;
     int oFlags = 0;
-    double minEgienValue = 0.001;
+    double minEgienValue = 0.01;
 
     calcOpticalFlowPyrLK(img_2,
                          img_1,
