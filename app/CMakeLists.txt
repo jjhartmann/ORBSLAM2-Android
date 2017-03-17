@@ -32,6 +32,18 @@ include_directories(${pathToProject}/app/src/main/cpp/include/)
 add_library( lib_opencv SHARED IMPORTED )
 set_target_properties(lib_opencv PROPERTIES IMPORTED_LOCATION ${pathToProject}/app/src/main/cpp/lib/opencv/${ANDROID_ABI}/libopencv_java3.so)
 
+####################################################################################################
+## Boost C++ v. 1_49
+####################################################################################################\
+#include_directories(${pathToProject}/app/src/main/cpp/Thirdparty/Boost/include/boost-1_49/)
+#add_library( lib_boost SHARED IMPORTED )
+#file(GLOB_RECURSE boost_lib_resources "${pathToProject}/app/src/main/cpp/Thirdparty/Boost/lib/*.a")
+#set_target_properties(lib_boost PROPERTIES IMPORTED_LOCATION ${boost_lib_resources})
+
+
+
+
+
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
 # default, you only need to specify the name of the public NDK library
@@ -52,7 +64,6 @@ find_library( # Sets the name of the path variable.
 target_link_libraries( # Specifies the target library.
                        native-lib
                        lib_opencv
+                       lib_boost
 
-                       # Links the target library to the log library
-                       # included in the NDK.
                        ${log-lib} )
