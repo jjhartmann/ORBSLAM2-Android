@@ -32,6 +32,7 @@
 
 namespace ORB_SLAM2
 {
+using namespace std;
 
 //implementation for singleton instance to remain alive for instance existed in JNI interface.
 System* System::_instance = NULL;

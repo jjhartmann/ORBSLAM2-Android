@@ -96,6 +96,7 @@ find_library( # Sets the name of the path variable.
               # you want CMake to locate.
               log )
 
+find_library(gles-lib GLESv1_CM)
 
 ####################################################################################################
 ## Set Target Link Libraries
@@ -104,6 +105,5 @@ find_library( # Sets the name of the path variable.
 target_link_libraries( # Specifies the target library.
                        native-lib
                        lib_opencv
-                       lib_boost
-                       ${Pangolin_LIBRARIES}
+                       ${gles-lib}
                        ${log-lib} )

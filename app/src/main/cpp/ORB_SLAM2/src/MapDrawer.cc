@@ -21,8 +21,11 @@
 #include "MapDrawer.h"
 #include "MapPoint.h"
 #include "KeyFrame.h"
-#include<GLES/gl.h>
+#include <GLES/gl.h>
 #include <GLES/glext.h>
+//#include <GLES3/gl32.h>
+//#include <GLES3/gl3ext.h>
+//#include <GLES3/gl3platform.h>
 #include <mutex>
 #include <android/log.h>
 #define LOG_TAG "ORB_SLAM_SYSTEM"
@@ -53,9 +56,9 @@ void MapDrawer::DrawMapPoints() {
 	if (vpMPs.empty())
 		return;
 
-	// 清除屏幕及深度缓存
+	// Clear screen and depth cache
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// 重置当前的模型观察矩阵
+	// Reset current model observation matrix
 	glMatrixMode (GL_MODELVIEW);
 	glLoadIdentity();
 	glScalef(2.0f,2.0f,2.0f);
