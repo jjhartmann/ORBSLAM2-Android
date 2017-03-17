@@ -1,28 +1,30 @@
-/** Project: ORB-SLAM-Android.
- *  For more information see <https://github.com/castoryan/ORB-SLAM-Android>
- *
- *  The original work was done by Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
- *  For more information see <https://github.com/raulmur/ORB_SLAM2>
- *
- *  filename: LocalMapping.cc
- *
- *  Created or Edited by Qinrui Yan on 30/Oct/2016.
- *  E-mail: castoryan1991@gmail.com
- *  Copyright © 2016 Qinrui Yan. All rights reserved.
- */
+/**
+* This file is part of ORB-SLAM2.
+*
+* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
+* For more information see <https://github.com/raulmur/ORB_SLAM2>
+*
+* ORB-SLAM2 is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* ORB-SLAM2 is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
+*/
 
-#include <android/log.h>
 #include "LocalMapping.h"
 #include "LoopClosing.h"
 #include "ORBmatcher.h"
 #include "Optimizer.h"
+#include<unistd.h>
 
 #include<mutex>
-
-
-
-#define TAG    "orb_debug_inmapping"
-#define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,TAG,__VA_ARGS__)
 
 namespace ORB_SLAM2
 {
@@ -45,13 +47,11 @@ void LocalMapping::SetTracker(Tracking *pTracker)
 
 void LocalMapping::Run()
 {
-    LOGD("IN LocalMapping: Thread LocalMapping is running");
 
     mbFinished = false;
 
     while(1)
     {
-        //LOGD("IN Mapping: Tracking thread id is %lu",std::this_thread::get_id());
         // Tracking will see that Local Mapping is busy
         SetAcceptKeyFrames(false);
 
@@ -78,7 +78,6 @@ void LocalMapping::Run()
             if(!CheckNewKeyFrames() && !stopRequested())
             {
                 // Local BA
-		// 如果当前map包含了超过3个或以上的keyframe, 那它就可以做BA
                 if(mpMap->KeyFramesInMap()>2)
                     Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpMap);
 

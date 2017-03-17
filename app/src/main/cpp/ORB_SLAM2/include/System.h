@@ -1,15 +1,23 @@
-/** Project: ORB-SLAM-Android.
- *  For more information see <https://github.com/castoryan/ORB-SLAM-Android>
- *
- *  The original work was done by Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
- *  For more information see <https://github.com/raulmur/ORB_SLAM2>
- *
- *  filename: System.h
- *
- *  Created or Edited by Qinrui Yan on 30/Oct/2016.
- *  E-mail: castoryan1991@gmail.com
- *  Copyright © 2016 Qinrui Yan. All rights reserved.
- */
+/**
+* This file is part of ORB-SLAM2.
+*
+* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
+* For more information see <https://github.com/raulmur/ORB_SLAM2>
+*
+* ORB-SLAM2 is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* ORB-SLAM2 is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 
 #ifndef SYSTEM_H
 #define SYSTEM_H
@@ -53,6 +61,21 @@ public:
     // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
     System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true);
 
+    //singleton instance for SLAM system used by JNI interface
+    static System* get_instance();
+    static System* _instance;
+
+    // Proccess the given stereo frame. Images must be synchronized and rectified.
+    // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
+    // Returns the camera pose (empty if tracking fails).
+    cv::Mat TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp);
+
+    // Process the given rgbd frame. Depthmap must be registered to the RGB frame.
+    // Input image: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
+    // Input depthmap: Float (CV_32F).
+    // Returns the camera pose (empty if tracking fails).
+    cv::Mat TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const double &timestamp);
+
     // Proccess the given monocular frame
     // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
     // Returns the camera pose (empty if tracking fails).
@@ -71,12 +94,29 @@ public:
     // This function must be called before saving the trajectory.
     void Shutdown();
 
+    // Save camera trajectory in the TUM RGB-D dataset format.
+    // Call first Shutdown()
+    // See format details at: http://vision.in.tum.de/data/datasets/rgbd-dataset
+    void SaveTrajectoryTUM(const string &filename);
+
+    // Save keyframe poses in the TUM RGB-D dataset format.
+    // Use this function in the monocular case.
+    // Call first Shutdown()
+    // See format details at: http://vision.in.tum.de/data/datasets/rgbd-dataset
+    void SaveKeyFrameTrajectoryTUM(const string &filename);
+
+    // Save camera trajectory in the KITTI dataset format.
+    // Call first Shutdown()
+    // See format details at: http://www.cvlibs.net/datasets/kitti/eval_odometry.php
+    void SaveTrajectoryKITTI(const string &filename);
+
+    void drawGL();
 
     // TODO: Save/Load functions
     // SaveMap(const string &filename);
     // LoadMap(const string &filename);
 
-public:
+private:
 
     // Input sensor
     eSensor mSensor;
@@ -112,7 +152,7 @@ public:
     // The Tracking thread "lives" in the main execution thread that creates the System object.
     std::thread* mptLocalMapping;
     std::thread* mptLoopClosing;
-    //std::thread* mptViewer;
+    std::thread* mptViewer;
 
     // Reset flag
     std::mutex mMutexReset;

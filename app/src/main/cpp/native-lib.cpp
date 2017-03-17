@@ -6,8 +6,8 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/core/ocl.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/tuple/tuple_io.hpp>
+//#include <boost/tuple/tuple.hpp>
+//#include <boost/tuple/tuple_io.hpp>
 
 using namespace std;
 using namespace cv;
@@ -21,8 +21,8 @@ Java_org_jjhartmann_jeremy_testopencv2_MainActivity_stringFromJNI(
 
     cv::Mat test = cv::Mat::eye(5, 5, CV_64F);
 
-    typedef boost::tuple<std::string, int> animal;
-    animal a{"cat", 4};
+//    typedef boost::tuple<std::string, int> animal;
+//    animal a{"cat", 4};
 
 
     return env->NewStringUTF(hello.c_str());

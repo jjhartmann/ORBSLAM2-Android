@@ -1,16 +1,23 @@
-/** Project: ORB-SLAM-Android.
- *  For more information see <https://github.com/castoryan/ORB-SLAM-Android>
- *
- *  The original work was done by Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
- *  For more information see <https://github.com/raulmur/ORB_SLAM2>
- *
- *  filename: Tracking.cc
- *
- *  Created or Edited by Qinrui Yan on 30/Oct/2016.
- *  E-mail: castoryan1991@gmail.com
- *  Copyright © 2016 Qinrui Yan. All rights reserved.
- */
-#include <android/log.h>
+/**
+* This file is part of ORB-SLAM2.
+*
+* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
+* For more information see <https://github.com/raulmur/ORB_SLAM2>
+*
+* ORB-SLAM2 is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* ORB-SLAM2 is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 
 #include "Tracking.h"
 
@@ -29,9 +36,10 @@
 #include<iostream>
 
 #include<mutex>
+#include <android/log.h>
+#define LOG_TAG "ORB_SLAM_TRACK"
 
-#define TAG    "orb_debug_intracking"
-#define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,TAG,__VA_ARGS__)
+#define LOG(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG, __VA_ARGS__)
 
 using namespace std;
 
@@ -113,10 +121,33 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
 
     mpORBextractorLeft = new ORBextractor(nFeatures,fScaleFactor,nLevels,fIniThFAST,fMinThFAST);
 
-    ORBextractor(nFeatures,fScaleFactor,nLevels,fIniThFAST,fMinThFAST);
+    if(sensor==System::STEREO)
+        mpORBextractorRight = new ORBextractor(nFeatures,fScaleFactor,nLevels,fIniThFAST,fMinThFAST);
 
     if(sensor==System::MONOCULAR)
         mpIniORBextractor = new ORBextractor(2*nFeatures,fScaleFactor,nLevels,fIniThFAST,fMinThFAST);
+
+    cout << endl  << "ORB Extractor Parameters: " << endl;
+    cout << "- Number of Features: " << nFeatures << endl;
+    cout << "- Scale Levels: " << nLevels << endl;
+    cout << "- Scale Factor: " << fScaleFactor << endl;
+    cout << "- Initial Fast Threshold: " << fIniThFAST << endl;
+    cout << "- Minimum Fast Threshold: " << fMinThFAST << endl;
+
+    if(sensor==System::STEREO || sensor==System::RGBD)
+    {
+        mThDepth = mbf*(float)fSettings["ThDepth"]/fx;
+        cout << endl << "Depth Threshold (Close/Far Points): " << mThDepth << endl;
+    }
+
+    if(sensor==System::RGBD)
+    {
+        mDepthMapFactor = fSettings["DepthMapFactor"];
+        if(mDepthMapFactor==0)
+            mDepthMapFactor=1;
+        else
+            mDepthMapFactor = 1.0f/mDepthMapFactor;
+    }
 
 }
 
@@ -130,16 +161,57 @@ void Tracking::SetLoopClosing(LoopClosing *pLoopClosing)
     mpLoopClosing=pLoopClosing;
 }
 
-
 void Tracking::SetViewer(Viewer *pViewer)
 {
-    //mpViewer=pViewer;
+    mpViewer=pViewer;
 }
 
 
-cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
+cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp)
 {
-    mImGray = im;
+    mImGray = imRectLeft;
+    cv::Mat imGrayRight = imRectRight;
+
+    if(mImGray.channels()==3)
+    {
+        if(mbRGB)
+        {
+            cvtColor(mImGray,mImGray,CV_RGB2GRAY);
+            cvtColor(imGrayRight,imGrayRight,CV_RGB2GRAY);
+        }
+        else
+        {
+            cvtColor(mImGray,mImGray,CV_BGR2GRAY);
+            cvtColor(imGrayRight,imGrayRight,CV_BGR2GRAY);
+        }
+    }
+    else if(mImGray.channels()==4)
+    {
+        if(mbRGB)
+        {
+            cvtColor(mImGray,mImGray,CV_RGBA2GRAY);
+            cvtColor(imGrayRight,imGrayRight,CV_RGBA2GRAY);
+        }
+        else
+        {
+            cvtColor(mImGray,mImGray,CV_BGRA2GRAY);
+            cvtColor(imGrayRight,imGrayRight,CV_BGRA2GRAY);
+        }
+    }
+
+    mCurrentFrame = Frame(mImGray,imGrayRight,timestamp,mpORBextractorLeft,mpORBextractorRight,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
+
+    Track();
+
+    return mCurrentFrame.mTcw.clone();
+}
+
+
+cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const double &timestamp)
+{
+    mImGray = imRGB;
+    cv::Mat imDepth = imD;
+
     if(mImGray.channels()==3)
     {
         if(mbRGB)
@@ -155,45 +227,45 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
             cvtColor(mImGray,mImGray,CV_BGRA2GRAY);
     }
 
-    //LOGD("IN GRAB: 1 mState is %d", mState);
+    if(mDepthMapFactor!=1 || imDepth.type()!=CV_32F);
+    imDepth.convertTo(imDepth,CV_32F,mDepthMapFactor);
+
+    mCurrentFrame = Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
+
+    Track();
+
+    return mCurrentFrame.mTcw.clone();
+}
+
+
+cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
+{
+    mImGray = im;
+
+    if(mImGray.channels()==3)
+    {
+        if(mbRGB)
+            cvtColor(mImGray,mImGray,CV_RGB2GRAY);
+        else
+            cvtColor(mImGray,mImGray,CV_BGR2GRAY);
+    }
+    else if(mImGray.channels()==4)
+    {
+        if(mbRGB)
+            cvtColor(mImGray,mImGray,CV_RGBA2GRAY);
+        else
+            cvtColor(mImGray,mImGray,CV_BGRA2GRAY);
+    }
 
     if(mState==NOT_INITIALIZED || mState==NO_IMAGES_YET)
         mCurrentFrame = Frame(mImGray,timestamp,mpIniORBextractor,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
     else
         mCurrentFrame = Frame(mImGray,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
-
     Track();
 
-    cv::Mat ima = mCurrentFrame.mTcw.clone();
-    //if((ima.rows == 0)&(ima.cols == 0)){
-        //LOGD("Waiting For Initialization");
-    //}
-
-    //LOGD("mCurrentFrame.mTcw rows %d  ", ima.rows);
-    //LOGD("mCurrentFrame.mTcw cols %d  ", ima.cols);
-    if((ima.rows == 4)&(ima.cols == 4)) {
-        LOGD("mCurrentFrame.mTcw [1][1] %f  ", ima.at<float>(0, 0));
-        LOGD("mCurrentFrame.mTcw [1][2] %f  ", ima.at<float>(0, 1));
-        LOGD("mCurrentFrame.mTcw [1][3] %f  ", ima.at<float>(0, 2));
-        LOGD("mCurrentFrame.mTcw [1][4] %f  ", ima.at<float>(0, 3));
-        LOGD("mCurrentFrame.mTcw [2][1] %f  ", ima.at<float>(1, 0));
-        LOGD("mCurrentFrame.mTcw [2][2] %f  ", ima.at<float>(1, 1));
-        LOGD("mCurrentFrame.mTcw [2][3] %f  ", ima.at<float>(1, 2));
-        LOGD("mCurrentFrame.mTcw [2][4] %f  ", ima.at<float>(1, 3));
-        LOGD("mCurrentFrame.mTcw [3][1] %f  ", ima.at<float>(2, 0));
-        LOGD("mCurrentFrame.mTcw [3][2] %f  ", ima.at<float>(2, 1));
-        LOGD("mCurrentFrame.mTcw [3][3] %f  ", ima.at<float>(2, 2));
-        LOGD("mCurrentFrame.mTcw [3][4] %f  ", ima.at<float>(2, 3));
-        LOGD("mCurrentFrame.mTcw [4][1] %f  ", ima.at<float>(3, 0));
-        LOGD("mCurrentFrame.mTcw [4][2] %f  ", ima.at<float>(3, 1));
-        LOGD("mCurrentFrame.mTcw [4][3] %f  ", ima.at<float>(3, 2));
-        LOGD("mCurrentFrame.mTcw [4][4] %f  ", ima.at<float>(3, 3));
-    }
     return mCurrentFrame.mTcw.clone();
 }
 
-
-// 每一帧都执行的track, 主要是TrackWithMotionModel(有移动) 和 TrackReferenceKeyFrame(没有移动)
 void Tracking::Track()
 {
     if(mState==NO_IMAGES_YET)
@@ -202,12 +274,20 @@ void Tracking::Track()
     }
 
     mLastProcessedState=mState;
+
     // Get Map Mutex -> Map cannot be changed
     unique_lock<mutex> lock(mpMap->mMutexMapUpdate);
+
     if(mState==NOT_INITIALIZED)
     {
-        LOGD("Waiting For Initialization");
-        MonocularInitialization();
+        if(mSensor==System::STEREO || mSensor==System::RGBD){
+        	  StereoInitialization();
+        }
+        else{
+           MonocularInitialization();
+        }
+
+
         mpFrameDrawer->Update(this);
 
         if(mState!=OK)
@@ -224,7 +304,6 @@ void Tracking::Track()
             // Local Mapping is activated. This is the normal behaviour, unless
             // you explicitly activate the "only tracking" mode.
 
-            //
             if(mState==OK)
             {
                 // Local Mapping might have changed some MapPoints tracked in last frame
@@ -341,7 +420,7 @@ void Tracking::Track()
             mState=LOST;
 
         // Update drawer
-        //mpFrameDrawer->Update(this);
+        mpFrameDrawer->Update(this);
 
         // If tracking were good, check if we insert a keyframe
         if(bOK)
@@ -357,7 +436,7 @@ void Tracking::Track()
             else
                 mVelocity = cv::Mat();
 
-            //mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.mTcw);
+            mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.mTcw);
 
             // Clean temporal point matches
             for(int i=0; i<mCurrentFrame.N; i++)
@@ -431,11 +510,66 @@ void Tracking::Track()
 
 }
 
+
+void Tracking::StereoInitialization()
+{
+    if(mCurrentFrame.N>500)
+    {
+        // Set Frame pose to the origin
+        mCurrentFrame.SetPose(cv::Mat::eye(4,4,CV_32F));
+
+        // Create KeyFrame
+        KeyFrame* pKFini = new KeyFrame(mCurrentFrame,mpMap,mpKeyFrameDB);
+
+        // Insert KeyFrame in the map
+        mpMap->AddKeyFrame(pKFini);
+
+        // Create MapPoints and asscoiate to KeyFrame
+        for(int i=0; i<mCurrentFrame.N;i++)
+        {
+            float z = mCurrentFrame.mvDepth[i];
+            if(z>0)
+            {
+                cv::Mat x3D = mCurrentFrame.UnprojectStereo(i);
+                MapPoint* pNewMP = new MapPoint(x3D,pKFini,mpMap);
+                pNewMP->AddObservation(pKFini,i);
+                pKFini->AddMapPoint(pNewMP,i);
+                pNewMP->ComputeDistinctiveDescriptors();
+                pNewMP->UpdateNormalAndDepth();
+                mpMap->AddMapPoint(pNewMP);
+
+                mCurrentFrame.mvpMapPoints[i]=pNewMP;
+            }
+        }
+
+        cout << "New map created with " << mpMap->MapPointsInMap() << " points" << endl;
+
+        mpLocalMapper->InsertKeyFrame(pKFini);
+
+        mLastFrame = Frame(mCurrentFrame);
+        mnLastKeyFrameId=mCurrentFrame.mnId;
+        mpLastKeyFrame = pKFini;
+
+        mvpLocalKeyFrames.push_back(pKFini);
+        mvpLocalMapPoints=mpMap->GetAllMapPoints();
+        mpReferenceKF = pKFini;
+        mCurrentFrame.mpReferenceKF = pKFini;
+
+        mpMap->SetReferenceMapPoints(mvpLocalMapPoints);
+
+        mpMap->mvpKeyFrameOrigins.push_back(pKFini);
+
+        mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.mTcw);
+
+        mState=OK;
+    }
+}
+
 void Tracking::MonocularInitialization()
 {
+
     if(!mpInitializer)
     {
-        LOGD("Initializing1: mCurrentFrame.mvKeys.size() is %d  ", mCurrentFrame.mvKeys.size());
         // Set Reference Frame
         if(mCurrentFrame.mvKeys.size()>100)
         {
@@ -457,7 +591,6 @@ void Tracking::MonocularInitialization()
     }
     else
     {
-        LOGD("Initializing2: mCurrentFrame.mvKeys.size() is %d  ", mCurrentFrame.mvKeys.size());
         // Try to initialize
         if((int)mCurrentFrame.mvKeys.size()<=100)
         {
@@ -470,7 +603,7 @@ void Tracking::MonocularInitialization()
         // Find correspondences
         ORBmatcher matcher(0.9,true);
         int nmatches = matcher.SearchForInitialization(mInitialFrame,mCurrentFrame,mvbPrevMatched,mvIniMatches,100);
-        LOGD("Initializing2: nmatches is %d  ", nmatches);
+
         // Check if there are enough correspondences
         if(nmatches<100)
         {
@@ -479,13 +612,12 @@ void Tracking::MonocularInitialization()
             return;
         }
 
-
         cv::Mat Rcw; // Current Camera Rotation
         cv::Mat tcw; // Current Camera Translation
         vector<bool> vbTriangulated; // Triangulated Correspondences (mvIniMatches)
-
         if(mpInitializer->Initialize(mCurrentFrame, mvIniMatches, Rcw, tcw, mvIniP3D, vbTriangulated))
         {
+        	LOG("mpInitializer->Initialize");
             for(size_t i=0, iend=mvIniMatches.size(); i<iend;i++)
             {
                 if(mvIniMatches[i]>=0 && !vbTriangulated[i])
@@ -494,15 +626,16 @@ void Tracking::MonocularInitialization()
                     nmatches--;
                 }
             }
-
+            LOG("mpInitializer->Initialize======>");
             // Set Frame Poses
             mInitialFrame.SetPose(cv::Mat::eye(4,4,CV_32F));
             cv::Mat Tcw = cv::Mat::eye(4,4,CV_32F);
             Rcw.copyTo(Tcw.rowRange(0,3).colRange(0,3));
             tcw.copyTo(Tcw.rowRange(0,3).col(3));
             mCurrentFrame.SetPose(Tcw);
-
+            LOG("CreateInitialMapMonocular");
             CreateInitialMapMonocular();
+
         }
     }
 }
@@ -554,6 +687,7 @@ void Tracking::CreateInitialMapMonocular()
     pKFcur->UpdateConnections();
 
     // Bundle Adjustment
+    LOG("New Map created with points");
     cout << "New Map created with " << mpMap->MapPointsInMap() << " points" << endl;
 
     Optimizer::GlobalBundleAdjustemnt(mpMap,20);
@@ -564,7 +698,7 @@ void Tracking::CreateInitialMapMonocular()
 
     if(medianDepth<0 || pKFcur->TrackedMapPoints(1)<100)
     {
-        cout << "Wrong initialization, reseting..." << endl;
+    	LOG("Wrong initialization, reseting...");
         Reset();
         return;
     }
@@ -602,10 +736,10 @@ void Tracking::CreateInitialMapMonocular()
 
     mpMap->SetReferenceMapPoints(mvpLocalMapPoints);
 
-    //mpMapDrawer->SetCurrentCameraPose(pKFcur->GetPose());
+    mpMapDrawer->SetCurrentCameraPose(pKFcur->GetPose());
 
     mpMap->mvpKeyFrameOrigins.push_back(pKFini);
-
+    LOG("mState=OK;");
     mState=OK;
 }
 
@@ -639,15 +773,12 @@ bool Tracking::TrackReferenceKeyFrame()
 
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
 
-    // 若匹配Bag of words太少, track失败
     if(nmatches<15)
         return false;
 
-    // 若匹配成功, 估计本帧的pose
     mCurrentFrame.mvpMapPoints = vpMapPointMatches;
     mCurrentFrame.SetPose(mLastFrame.mTcw);
 
-    // 直接对本帧进行graph优化
     Optimizer::PoseOptimization(&mCurrentFrame);
 
     // Discard outliers
@@ -748,13 +879,11 @@ bool Tracking::TrackWithMotionModel()
     // Create "visual odometry" points
     UpdateLastFrame();
 
-    // 直接用motion model预测pose
     mCurrentFrame.SetPose(mVelocity*mLastFrame.mTcw);
 
     fill(mCurrentFrame.mvpMapPoints.begin(),mCurrentFrame.mvpMapPoints.end(),static_cast<MapPoint*>(NULL));
 
     // Project points seen in previous frame
-    // 在之前的frame中找匹配点,看有多少.
     int th;
     if(mSensor!=System::STEREO)
         th=15;
@@ -763,19 +892,16 @@ bool Tracking::TrackWithMotionModel()
     int nmatches = matcher.SearchByProjection(mCurrentFrame,mLastFrame,th,mSensor==System::MONOCULAR);
 
     // If few matches, uses a wider window search
-    // 如果匹配点太少, 把window size增大一倍再搜一次
     if(nmatches<20)
     {
         fill(mCurrentFrame.mvpMapPoints.begin(),mCurrentFrame.mvpMapPoints.end(),static_cast<MapPoint*>(NULL));
         nmatches = matcher.SearchByProjection(mCurrentFrame,mLastFrame,2*th,mSensor==System::MONOCULAR);
     }
 
-    // 如果增大了窗口还匹配还不够, 放弃治疗
     if(nmatches<20)
         return false;
 
     // Optimize frame pose with all matches
-    // 如果匹配够了,说明currentFrame可以用, 把它扔进graph里面去优化
     Optimizer::PoseOptimization(&mCurrentFrame);
 
     // Discard outliers
@@ -797,7 +923,7 @@ bool Tracking::TrackWithMotionModel()
             else if(mCurrentFrame.mvpMapPoints[i]->Observations()>0)
                 nmatchesMap++;
         }
-    }
+    }    
 
     if(mbOnlyTracking)
     {
@@ -1397,11 +1523,11 @@ bool Tracking::Relocalization()
 
 void Tracking::Reset()
 {
-    //mpViewer->RequestStop();
-
+    mpViewer->RequestStop();
+    LOG("System Reseting");
     cout << "System Reseting" << endl;
-    //while(!mpViewer->isStopped())
-    //    usleep(3000);
+//    while(!mpViewer->isStopped())
+//        usleep(3000);
 
     // Reset Local Mapping
     cout << "Reseting Local Mapper...";
@@ -1436,7 +1562,8 @@ void Tracking::Reset()
     mlFrameTimes.clear();
     mlbLost.clear();
 
-    //mpViewer->Release();
+    mpViewer->Release();
+    LOG("mpViewer->Release();");
 }
 
 void Tracking::ChangeCalibration(const string &strSettingPath)
