@@ -37,9 +37,9 @@ VIOEngine::~VIOEngine()
 }
 
 void VIOEngine::Init(int width, int height) {
-    mCurrentImage = new VIOImage(4, 0.1, width, height);
-    mPreviousImage = new VIOImage(4, 0.1, width, height);
-    mPendingImage = new VIOImage(4, 0.1, width, height);
+    mCurrentImage = new VIOImage(4, 0.2, width, height);
+    mPreviousImage = new VIOImage(4, 0.2, width, height);
+    mPendingImage = new VIOImage(4, 0.2, width, height);
 }
 
 void VIOEngine::ProcessImage(cv::Mat &inputImg) {
