@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     private Mat                     mGrayImag;
 
     private IEngineJNI              mEngine;
+    private Object                  mEngineLock;
 
     // Used to load the 'native-lib' library on application startup.
     static
@@ -47,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
                     mOpenCameraView.enableView();
-                    mEngine = new IEngineJNI();
                 } break;
                 default:
                 {
@@ -70,12 +70,17 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         setContentView(R.layout.activity_main);
 
         // Init the camera view
+
         mOpenCameraView = (CameraBridgeViewBase) findViewById(R.id.tutorial1_activity_java_surface_view);
         mOpenCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCameraView.setFocusable(false);
         mOpenCameraView.setCvCameraViewListener(this);
 
 
-        //TextView textView = (TextView) findViewById(R.id.textView);
+        // Create Engine
+        mEngine = new IEngineJNI();
+
+
 
 
 
@@ -109,6 +114,9 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         if (mOpenCameraView != null) {
             mOpenCameraView.disableView();
         }
+        if (mEngine != null){
+            mEngine.Stop();
+        }
     }
 
     /**
@@ -133,7 +141,10 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     @Override
     public void onCameraViewStarted(int width, int height)
     {
-
+        if (!mEngine.isRunning){
+            mEngine.Start(width, height);
+            mEngine.isRunning = true;
+        }
     }
 
     /**
@@ -164,8 +175,10 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         // Feature detection
         mRgbaImg = inputFrame.rgba();
         mGrayImag = inputFrame.gray();
-        mEngine.FindFeatures(mGrayImag.getNativeObjAddr(), mRgbaImg.getNativeObjAddr());
+//        mEngine.FindFeatures(mGrayImag.getNativeObjAddr(), mRgbaImg.getNativeObjAddr());
 
+        // Detect VO1
+        mEngine.VisualOdometry(mRgbaImg.getNativeObjAddr());
 
         return mRgbaImg;
     }

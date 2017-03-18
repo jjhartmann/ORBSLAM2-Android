@@ -24,3 +24,43 @@ Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_FindFeatures(JNIEnv *env, jobj
         circle(rgbaMat, Point(kp.pt.x, kp.pt.y), 10, Scalar(255,0,0,255));
     }
 }
+
+JNIEXPORT void JNICALL
+Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_VisualOdometry(JNIEnv *env, jobject instance,
+                                                                 jlong matAddrCurrent) {
+    // TODO: COnduct visual odometrry
+
+    Mat &cImg = *(Mat *)matAddrCurrent; // NOT OWNED
+
+    // Process image.
+    mVIOEngineAddr->ProcessImage(cImg);
+#if DEBUG_MODE
+    mVIOEngineAddr->PrintPoint(cImg, cImg.cols/2, cImg.rows/2);
+#endif
+
+    // Shift image buffers
+    mVIOEngineAddr->ShiftBuffers();
+}
+
+JNIEXPORT void JNICALL
+Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_Start(JNIEnv *env, jobject instance,
+                                                        jint width,
+                                                        jint height) {
+
+    // TODO: Create initlilization of VIO
+    int w = width;
+    int h = height;
+    mVIOEngineAddr = new VIOEngine();
+    mVIOEngineAddr->Init(w, h);
+
+}
+
+JNIEXPORT void JNICALL
+Java_org_jjhartmann_jeremy_testopencv2_IEngineJNI_Stop(JNIEnv *env, jobject instance) {
+
+    // TODO: Clean the mVIOEngine
+    if (mVIOEngineAddr != nullptr){
+        delete mVIOEngineAddr;
+    }
+
+}

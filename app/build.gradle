@@ -18,7 +18,7 @@ android {
     }
     sourceSets {
         main {
-            jniLibs.srcDirs = ['src/main/cpp/lib/opencv']
+            jniLibs.srcDirs = ['src/main/cpp/lib/opencv', 'src/main/cpp/Thirdparty/Boost/lib']
             jni.srcDirs = ['src/main/cpp']
         }
     }
@@ -32,6 +32,9 @@ android {
         cmake {
             path "CMakeLists.txt"
         }
+    }
+    dexOptions {
+        javaMaxHeapSize "10g"
     }
 }
 
