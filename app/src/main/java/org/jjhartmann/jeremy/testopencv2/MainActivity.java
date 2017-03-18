@@ -9,16 +9,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import org.jjhartmann.jeremy.testopencv2.JNIBindings.IEngineJNI;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 
 public class MainActivity extends AppCompatActivity implements CvCameraViewListener2
 {
@@ -30,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     private Mat                     mRgbaImg;
     private Mat                     mGrayImag;
 
-    private IEngineJNI              mEngine;
+    private IEngineJNI mEngine;
     private Object                  mEngineLock;
 
     // Used to load the 'native-lib' library on application startup.

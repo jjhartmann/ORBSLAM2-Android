@@ -20,6 +20,31 @@
         android:textSize="50sp"
         android:textStyle="bold"/>
 
+    <!--Main camera view for OpenGL Surface view.-->
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="7dp"
+        android:layout_marginRight="7dp">
+
+        <org.opencv.android.JavaCameraView
+            android:id="@+id/tutorial1_activity_java_surface_view"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:visibility="gone"
+            opencv:camera_id="any"
+            opencv:show_fps="true"/>
+
+        <org.opencv.android.CameraGLSurfaceView
+            android:id="@+id/tutorial1_activity_gl_surface_view"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:visibility="gone"
+            opencv:camera_id="any"
+            opencv:show_fps="true"/>
+    </RelativeLayout>
+
+
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
     <FrameLayout
@@ -47,30 +72,6 @@
 
         </LinearLayout>
 
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginEnd="7dp"
-            android:layout_marginRight="7dp">
-
-            <org.opencv.android.JavaCameraView
-                android:id="@+id/tutorial1_activity_java_surface_view"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:visibility="gone"
-                opencv:camera_id="any"
-                opencv:show_fps="true"/>
-
-            <org.opencv.android.CameraGLSurfaceView
-                android:id="@+id/tutorial1_activity_gl_surface_view"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:visibility="gone"
-                opencv:camera_id="any"
-                opencv:show_fps="true"/>
-
-
-        </RelativeLayout>
 
     </FrameLayout>
 

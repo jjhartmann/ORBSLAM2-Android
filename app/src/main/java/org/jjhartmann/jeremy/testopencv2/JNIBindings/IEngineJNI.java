@@ -1,4 +1,4 @@
-package org.jjhartmann.jeremy.testopencv2;
+package org.jjhartmann.jeremy.testopencv2.JNIBindings;
 
 import org.opencv.core.Point3;
 

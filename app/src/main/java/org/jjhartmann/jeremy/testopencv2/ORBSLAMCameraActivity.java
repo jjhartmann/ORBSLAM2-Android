@@ -1,27 +1,22 @@
 package org.jjhartmann.jeremy.testopencv2;
 
 import android.annotation.SuppressLint;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.opengl.GLSurfaceView;
 import android.opengl.GLSurfaceView.Renderer;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import org.jjhartmann.jeremy.testopencv2.JNIBindings.IEngineJNI;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -45,6 +40,45 @@ public class ORBSLAMCameraActivity
      * user interaction before hiding the system UI.
      */
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Private Vars
+    private static final String     TAG = "VIO::ORBSLAMActivity";
+    private CameraBridgeViewBase    mOpenCameraView;
+    private Object                  mChangeState;
+    private boolean                 mIsGoing = false;
+
+    private Mat                     mRgbaImg;
+    private Mat                     mGrayImag;
+
+    private IEngineJNI mEngine;
+    private Object                  mEngineLock;
+
+    // Used to load the 'native-lib' library on application startup.
+    static
+    {
+        System.loadLibrary("native-lib");
+    }
+
+    // Call back for async opencv init
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS:
+                {
+                    Log.i(TAG, "OpenCV loaded successfully");
+                    mOpenCameraView.enableView();
+                } break;
+                default:
+                {
+                    Log.i(TAG, "OpenCV Loading error!! - mLoaderCallback");
+                    super.onManagerConnected(status);
+                } break;
+            }
+        }
+    };
+
 
     /**
      * Some older devices needs a small delay between UI widget updates
@@ -114,6 +148,9 @@ public class ORBSLAMCameraActivity
         }
     };
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // OnCreate Method
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
