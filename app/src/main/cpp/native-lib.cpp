@@ -13,7 +13,7 @@
 using namespace std;
 using namespace cv;
 
-//static ORB_SLAM2::System *s;
+static ORB_SLAM2::System *s;
 
 extern "C"
 JNIEXPORT jstring JNICALL
@@ -26,7 +26,7 @@ Java_org_jjhartmann_jeremy_testopencv2_MainActivity_stringFromJNI(
 
     string voc_string = "some/path/";
     string cal_string = "To/some/calib/file";
-    //s=new ORB_SLAM2::System(voc_string,cal_string,ORB_SLAM2::System::MONOCULAR,true);
+//    s=new ORB_SLAM2::System(voc_string,cal_string,ORB_SLAM2::System::MONOCULAR,true);
 
 
     return env->NewStringUTF(hello.c_str());

@@ -37,9 +37,9 @@ VIOEngine::~VIOEngine()
 }
 
 void VIOEngine::Init(int width, int height) {
-    mCurrentImage = new VIOImage(4, 0.5, width, height);
-    mPreviousImage = new VIOImage(4, 0.5, width, height);
-    mPendingImage = new VIOImage(4, 0.5, width, height);
+    mCurrentImage = new VIOImage(4, 0.1, width, height);
+    mPreviousImage = new VIOImage(4, 0.1, width, height);
+    mPendingImage = new VIOImage(4, 0.1, width, height);
 }
 
 void VIOEngine::ProcessImage(cv::Mat &inputImg) {
@@ -235,10 +235,10 @@ void VIOEngine::CalcOpticalFlow(cv::Mat img_1,
 
     // Set Params: TODO: Pull these from a calibration class?
     Size winSize = Size(21 ,21);
-    TermCriteria termcrit = TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 50, 0.01);
+    TermCriteria termcrit = TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01);
     int maxLevel = 3;
     int oFlags = 0;
-    double minEgienValue = 0.01;
+    double minEgienValue = 0.001;
 
     calcOpticalFlowPyrLK(img_2,
                          img_1,

@@ -33,14 +33,6 @@ android {
             path "CMakeLists.txt"
         }
     }
-    productFlavors {
-        armv7 {
-            ndk {
-                abiFilter "armeabi-v7a"
-            }
-        }
-        fat
-    }
     dexOptions {
         javaMaxHeapSize "10g"
     }

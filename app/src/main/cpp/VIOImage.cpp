@@ -41,6 +41,7 @@ void VIOImage::CreateOctaves(Mat &imgAddr) {
 
     // Convert Color
     cvtColor(newImg, newImg, COLOR_RGBA2GRAY);
+    Laplacian(newImg, newImg, CV_8U, 3, 1, 0, BORDER_DEFAULT);
     mGrayImgs.push_back(newImg);
 
     // Push empty array
@@ -52,7 +53,8 @@ void VIOImage::CreateOctaves(Mat &imgAddr) {
         mImages.push_back(dstImg);
 
         cvtColor(dstImg, dstImg, COLOR_RGBA2GRAY);
-        mGrayImgs.push_back(newImg);
+        Laplacian(dstImg, dstImg, CV_8U, 3, 1, 0, BORDER_DEFAULT);
+        mGrayImgs.push_back(dstImg);
 
         mKPArray.push_back(vector<KeyPoint>());
         mKPPointFArray.push_back(vector<Point2f>());
