@@ -9,8 +9,8 @@
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
          TextureView, etc. -->
-    <TextView
-        android:id="@+id/fullscreen_content"
+    <org.opencv.android.JavaCameraView
+        android:id="@+id/tutorial1_activity_java_surface_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
@@ -21,28 +21,28 @@
         android:textStyle="bold"/>
 
     <!--Main camera view for OpenGL Surface view.-->
-    <RelativeLayout
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginEnd="7dp"
-        android:layout_marginRight="7dp">
+    <!--<RelativeLayout-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="0dp"-->
+        <!--android:layout_marginEnd="7dp"-->
+        <!--android:layout_marginRight="7dp">-->
 
-        <org.opencv.android.JavaCameraView
-            android:id="@+id/tutorial1_activity_java_surface_view"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:visibility="gone"
-            opencv:camera_id="any"
-            opencv:show_fps="true"/>
+        <!--<org.opencv.android.JavaCameraView-->
+            <!--android:id="@+id/tutorial1_activity_java_surface_view"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="fill_parent"-->
+            <!--android:visibility="gone"-->
+            <!--opencv:camera_id="any"-->
+            <!--opencv:show_fps="true"/>-->
 
-        <org.opencv.android.CameraGLSurfaceView
-            android:id="@+id/tutorial1_activity_gl_surface_view"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:visibility="gone"
-            opencv:camera_id="any"
-            opencv:show_fps="true"/>
-    </RelativeLayout>
+        <!--<org.opencv.android.CameraGLSurfaceView-->
+            <!--android:id="@+id/tutorial1_activity_gl_surface_view"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="fill_parent"-->
+            <!--android:visibility="gone"-->
+            <!--opencv:camera_id="any"-->
+            <!--opencv:show_fps="true"/>-->
+    <!--</RelativeLayout>-->
 
 
     <!-- This FrameLayout insets its children based on system windows using
@@ -62,13 +62,13 @@
             android:orientation="horizontal"
             tools:ignore="UselessParent">
 
-            <Button
-                android:id="@+id/dummy_button"
-                style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/dummy_button"/>
+            <!--<Button-->
+                <!--android:id="@+id/dummy_button"-->
+                <!--style="?metaButtonBarButtonStyle"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="1"-->
+                <!--android:text="@string/dummy_button"/>-->
 
         </LinearLayout>
 
