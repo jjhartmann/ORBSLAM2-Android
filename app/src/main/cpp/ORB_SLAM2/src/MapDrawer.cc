@@ -30,7 +30,7 @@
 #include <android/log.h>
 #define LOG_TAG "ORB_SLAM_SYSTEM"
 
-#define LOG(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG, __VA_ARGS__)
 
 namespace ORB_SLAM2 {
 

@@ -26,7 +26,7 @@
 #include <android/log.h>
 #define LOG_TAG "ORB_SLAM_SYSTEM"
 
-#define LOG(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG, __VA_ARGS__)
 
 namespace ORB_SLAM2
 {
@@ -173,7 +173,7 @@ void Viewer::Run()
 }
 
 void Viewer::drawGL(){
-	LOG("Viewer drawGL Thread has been started!");
+	LOGD("Viewer drawGL Thread has been started!");
 	mpMapDrawer->DrawKeyFrames(true,true);
 	mpMapDrawer->DrawMapPoints();
 	mpMapDrawer->DrawCurrentCamera(mpMapDrawer->GetCurrentOpenGLCameraMatrix());

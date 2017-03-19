@@ -1,4 +1,4 @@
-/**
+/*
 * This file is part of ORB-SLAM2.
 *
 * Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
@@ -28,7 +28,8 @@
 #include <android/log.h>
 #define LOG_TAG "ORB_SLAM_SYSTEM"
 
-#define LOG(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 namespace ORB_SLAM2
 {
@@ -45,43 +46,41 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
         mbDeactivateLocalizationMode(false)
 {
 	_instance = this;
-	LOG("ORB_initiate");
-    cout << endl <<
-    "ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza." << endl <<
-    "This program comes with ABSOLUTELY NO WARRANTY;" << endl  <<
-    "This is free software, and you are welcome to redistribute it" << endl <<
-    "under certain conditions. See LICENSE.txt." << endl << endl;
+	LOGD("ORB_initiate");
+    LOGD("ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza. \n \
+         This program comes with ABSOLUTELY NO WARRANTY This is free software, \n \
+         and you are welcome to redistribute it under certain conditions. See LICENSE.txt.");
 
-    cout << "Input sensor was set to: ";
+    LOGD("Input sensor was set to: ");
 
     if(mSensor==MONOCULAR)
-        cout << "Monocular" << endl;
+        LOGD("Monocular");
     else if(mSensor==STEREO)
-        cout << "Stereo" << endl;
+        LOGD("Stereo");
     else if(mSensor==RGBD)
-        cout << "RGB-D" << endl;
+        LOGD("RGB-D");
 
     //Check settings file
     cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);
     if(!fsSettings.isOpened())
     {
-       cerr << "Failed to open settings file at: " << strSettingsFile << endl;
-       exit(-1);
+       LOGE("Failed to open settings file at: ", strSettingsFile.c_str());
+       throw;
     }
 
 
     //Load ORB Vocabulary
-    cout << endl << "Loading ORB Vocabulary. This could take a while..." << endl;
+    LOGD("Loading ORB Vocabulary. This could take a while...");
 
     mpVocabulary = new ORBVocabulary();
     bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
     if(!bVocLoad)
     {
-        cerr << "Wrong path to vocabulary. " << endl;
-        cerr << "Falied to open at: " << strVocFile << endl;
-        exit(-1);
+        LOGE("Wrong path to vocabulary. ");
+        LOGE("Falied to open at: ", strVocFile.c_str());
+        throw;
     }
-    cout << "Vocabulary loaded!" << endl << endl;
+    LOGD("Vocabulary loaded!");
 
     //Create KeyFrame Database
     mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
@@ -125,7 +124,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 }
 
 void System::drawGL(){
-	LOG("drawGL Thread has been started!");
+	LOGD("drawGL Thread has been started!");
 	mpViewer->drawGL();
 }
 
@@ -133,8 +132,8 @@ cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const
 {
     if(mSensor!=STEREO)
     {
-        cerr << "ERROR: you called TrackStereo but input sensor was not set to STEREO." << endl;
-        exit(-1);
+        LOGE("ERROR: you called TrackStereo but input sensor was not set to STEREO.");
+        throw;
     }   
 
     // Check mode change
@@ -178,8 +177,8 @@ cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const doub
 {
     if(mSensor!=RGBD)
     {
-        cerr << "ERROR: you called TrackRGBD but input sensor was not set to RGBD." << endl;
-        exit(-1);
+        LOGE("ERROR: you called TrackRGBD but input sensor was not set to RGBD.");
+        throw;
     }    
 
     // Check mode change
@@ -223,8 +222,8 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
 {
     if(mSensor!=MONOCULAR)
     {
-    	LOG("ERROR: you called TrackMonocular but input sensor was not set to Monocular." );
-        exit(-1);
+    	LOGE("ERROR: you called TrackMonocular but input sensor was not set to Monocular." );
+        throw;
     }
 
     // Check mode change
@@ -300,7 +299,7 @@ void System::Shutdown()
 
 void System::SaveTrajectoryTUM(const string &filename)
 {
-    cout << endl << "Saving camera trajectory to " << filename << " ..." << endl;
+    LOGD("Saving camera trajectory to %s ....", filename.c_str());
 
     vector<KeyFrame*> vpKFs = mpMap->GetAllKeyFrames();
     sort(vpKFs.begin(),vpKFs.end(),KeyFrame::lId);
@@ -350,13 +349,13 @@ void System::SaveTrajectoryTUM(const string &filename)
         f << setprecision(6) << *lT << " " <<  setprecision(9) << twc.at<float>(0) << " " << twc.at<float>(1) << " " << twc.at<float>(2) << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
     }
     f.close();
-    cout << endl << "trajectory saved!" << endl;
+    LOGD("trajectory saved!");
 }
 
 
 void System::SaveKeyFrameTrajectoryTUM(const string &filename)
 {
-    cout << endl << "Saving keyframe trajectory to " << filename << " ..." << endl;
+    LOGD("Saving keyframe trajectory to %s ...", filename.c_str());
 
     vector<KeyFrame*> vpKFs = mpMap->GetAllKeyFrames();
     sort(vpKFs.begin(),vpKFs.end(),KeyFrame::lId);
@@ -387,12 +386,12 @@ void System::SaveKeyFrameTrajectoryTUM(const string &filename)
     }
 
     f.close();
-    cout << endl << "trajectory saved!" << endl;
+    LOGD("trajectory saved!");
 }
 
 void System::SaveTrajectoryKITTI(const string &filename)
 {
-    cout << endl << "Saving camera trajectory to " << filename << " ..." << endl;
+    LOGD("Saving camera trajectory to %s ...", filename.c_str());
 
     vector<KeyFrame*> vpKFs = mpMap->GetAllKeyFrames();
     sort(vpKFs.begin(),vpKFs.end(),KeyFrame::lId);
@@ -437,7 +436,7 @@ void System::SaveTrajectoryKITTI(const string &filename)
              Rwc.at<float>(2,0) << " " << Rwc.at<float>(2,1)  << " " << Rwc.at<float>(2,2) << " "  << twc.at<float>(2) << endl;
     }
     f.close();
-    cout << endl << "trajectory saved!" << endl;
+    LOGD("trajectory saved!");
 }
 
 } //namespace ORB_SLAM
