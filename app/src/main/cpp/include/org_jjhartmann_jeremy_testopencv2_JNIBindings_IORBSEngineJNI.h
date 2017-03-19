@@ -26,8 +26,8 @@ JNIEXPORT void JNICALL Java_org_jjhartmann_jeremy_testopencv2_JNIBindings_IORBSE
  * Method:    TrackMonocular
  * Signature: (J)J
  */
-JNIEXPORT jlong JNICALL Java_org_jjhartmann_jeremy_testopencv2_JNIBindings_IORBSEngineJNI_TrackMonocular
-  (JNIEnv *, jobject, jlong, jlong);
+JNIEXPORT void JNICALL Java_org_jjhartmann_jeremy_testopencv2_JNIBindings_IORBSEngineJNI_TrackMonocular
+  (JNIEnv *, jobject, jlong, jlong, jlong);
 
 /*
  * Class:     org_jjhartmann_jeremy_testopencv2_JNIBindings_IORBSEngineJNI

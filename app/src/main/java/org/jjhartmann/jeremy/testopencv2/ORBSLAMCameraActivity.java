@@ -2,18 +2,17 @@ package org.jjhartmann.jeremy.testopencv2;
 
 import android.annotation.SuppressLint;
 import android.content.res.AssetManager;
-import android.opengl.GLSurfaceView.Renderer;
+import android.graphics.Bitmap;
 import android.os.Environment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.ImageView;
 
-import org.jjhartmann.jeremy.testopencv2.JNIBindings.IEngineJNI;
 import org.jjhartmann.jeremy.testopencv2.JNIBindings.IORBSEngineJNI;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -22,6 +21,7 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.CameraGLSurfaceView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.io.File;
@@ -29,9 +29,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -149,6 +146,7 @@ public class ORBSLAMCameraActivity
 
     private Mat                     mRgbaImg;
     private Mat                     mGrayImag;
+    private Mat                     mFrameDraw;
 
     private IORBSEngineJNI          mORBEngine;
     private Object                  mEngineLock;
@@ -219,7 +217,7 @@ public class ORBSLAMCameraActivity
 
         // Copy Assets to external file directory
         final File calibFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), mCamCalibFileName);
-        if (!calibFile.exists()){
+        if (true || !calibFile.exists()){
             copyAsset(mCamCalibFileName);
         }
 
@@ -326,8 +324,8 @@ public class ORBSLAMCameraActivity
     {
         if (!mORBEngine.isRunning) {
             // TODO: Get teh Voc DB and settingsFile.
-            String vocDBFile = Environment.getExternalStorageDirectory().getAbsolutePath() + mORBBowVocabularyName;
-            String settingsFile = Environment.getExternalStorageDirectory().getAbsolutePath() + mCamCalibFileName;
+            String vocDBFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + mORBBowVocabularyName;
+            String settingsFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + mCamCalibFileName;
             mORBEngine.InitSystem(vocDBFile, settingsFile);
             mORBEngine.isRunning = true;
         }
@@ -355,7 +353,25 @@ public class ORBSLAMCameraActivity
     {
         mRgbaImg = inputFrame.rgba();
         mGrayImag = inputFrame.gray();
-        mORBEngine.TrackMonocular(mGrayImag.getNativeObjAddr(), mRgbaImg.getNativeObjAddr());
+        mFrameDraw = new Mat();
+
+        mORBEngine.TrackMonocular(mGrayImag.getNativeObjAddr(), mRgbaImg.getNativeObjAddr(), mFrameDraw.getNativeObjAddr());
+
+        final Bitmap bm = Bitmap.createBitmap(mFrameDraw.cols(), mFrameDraw.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mFrameDraw, bm);
+
+        // TODO: refactor this into thread
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                ImageView iv = (ImageView) findViewById(R.id.status_imageView);
+                iv.setImageBitmap(bm);
+            }
+        });
+
+
         return mRgbaImg;
     }
 

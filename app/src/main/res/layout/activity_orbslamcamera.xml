@@ -9,16 +9,6 @@
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
          TextureView, etc. -->
-    <org.opencv.android.JavaCameraView
-        android:id="@+id/tutorial1_activity_java_surface_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:keepScreenOn="true"
-        android:text="@string/dummy_content"
-        android:textColor="#33b5e5"
-        android:textSize="50sp"
-        android:textStyle="bold"/>
 
     <!--Main camera view for OpenGL Surface view.-->
     <!--<RelativeLayout-->
@@ -47,6 +37,28 @@
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
+
+    <org.opencv.android.JavaCameraView
+        android:id="@+id/tutorial1_activity_java_surface_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:alpha="0.1"
+        android:elevation="1dp"
+        android:gravity="center"
+        android:keepScreenOn="true"
+        android:textColor="#33b5e5"
+        android:textSize="50sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        opencv:camera_id="any"
+        opencv:show_fps="true"/>
+
+    <ImageView
+        android:id="@+id/status_imageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        opencv:srcCompat="@color/black_overlay"/>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -63,12 +75,12 @@
             tools:ignore="UselessParent">
 
             <!--<Button-->
-                <!--android:id="@+id/dummy_button"-->
-                <!--style="?metaButtonBarButtonStyle"-->
-                <!--android:layout_width="0dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_weight="1"-->
-                <!--android:text="@string/dummy_button"/>-->
+            <!--android:id="@+id/dummy_button"-->
+            <!--style="?metaButtonBarButtonStyle"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="@string/dummy_button"/>-->
 
         </LinearLayout>
 

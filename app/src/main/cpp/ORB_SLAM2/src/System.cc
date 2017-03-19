@@ -65,7 +65,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     if(!fsSettings.isOpened())
     {
        LOGE("Failed to open settings file at: ", strSettingsFile.c_str());
-       throw;
+       throw std::runtime_error(std::string("Failed to open settings file at: ") + strSettingsFile);
     }
 
 
@@ -77,8 +77,8 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     if(!bVocLoad)
     {
         LOGE("Wrong path to vocabulary. ");
-        LOGE("Falied to open at: ", strVocFile.c_str());
-        throw;
+        LOGE("Falied to open at: %s", strVocFile.c_str());
+        throw std::runtime_error(std::string("Failed to open settings file at: ") + strVocFile);
     }
     LOGD("Vocabulary loaded!");
 

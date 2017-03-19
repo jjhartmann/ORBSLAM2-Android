@@ -29,17 +29,21 @@ Java_org_jjhartmann_jeremy_testopencv2_JNIBindings_IORBSEngineJNI_InitSystem(JNI
     env->ReleaseStringUTFChars(settingsFile_, settingsFile);
 }
 
-JNIEXPORT jlong JNICALL
+JNIEXPORT void JNICALL
 Java_org_jjhartmann_jeremy_testopencv2_JNIBindings_IORBSEngineJNI_TrackMonocular(JNIEnv *env,
                                                                                  jobject instance,
                                                                                  jlong matAddr,
-                                                                                 jlong matRgbaAddr) {
+                                                                                 jlong matRgbaAddr,
+                                                                                 jlong matFrameDrawAddr) {
     // Convert images to mat
     Mat &cImg = *(Mat *)matAddr; // NOT OWNED
     Mat &cRgbaImg = *(Mat *)matRgbaAddr; // NOT OWNED
+    Mat &cFrameDraw = *(Mat *)matFrameDrawAddr; // NOT OWNED
 
     // Call method to process image
-    cRgbaImg = orbSlamEngine->ProcessImage(cImg);
+    cv::Mat framedraw = orbSlamEngine->ProcessImage(cImg);
+    framedraw.copyTo(cFrameDraw);
+    cvtColor(cFrameDraw, cFrameDraw, CV_BGR2BGRA);
 }
 
 JNIEXPORT void JNICALL

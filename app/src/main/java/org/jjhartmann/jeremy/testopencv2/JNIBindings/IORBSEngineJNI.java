@@ -12,7 +12,7 @@ public class IORBSEngineJNI
 {
     public boolean isRunning = false;
     public native void InitSystem(String vocDataBase, String settingsFile);
-    public native long TrackMonocular(long matAddr, long matRgbaAddr);
+    public native void TrackMonocular(long matAddr, long matRgbaAddr, long matFrameDrawAddr);
     public native void Shutdown();
     public native void GLESInit();
     public native void GLESRender();

@@ -608,6 +608,7 @@ void Tracking::MonocularInitialization()
         // Check if there are enough correspondences
         if(nmatches<100)
         {
+            LOGD("Not enough correspondence");
             delete mpInitializer;
             mpInitializer = static_cast<Initializer*>(NULL);
             return;
