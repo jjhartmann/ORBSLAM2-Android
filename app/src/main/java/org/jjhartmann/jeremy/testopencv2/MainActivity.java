@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     private Mat                     mRgbaImg;
     private Mat                     mGrayImag;
 
-    private IEngineJNI mEngine;
+    private IEngineJNI              mEngine;
     private Object                  mEngineLock;
 
     // Used to load the 'native-lib' library on application startup.
