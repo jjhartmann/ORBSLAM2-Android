@@ -1,7 +1,9 @@
 package org.jjhartmann.jeremy.testopencv2;
 
 import android.annotation.SuppressLint;
+import android.content.res.AssetManager;
 import android.opengl.GLSurfaceView.Renderer;
+import android.os.Environment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,6 +23,12 @@ import org.opencv.android.CameraGLSurfaceView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -145,6 +153,9 @@ public class ORBSLAMCameraActivity
     private IORBSEngineJNI          mORBEngine;
     private Object                  mEngineLock;
 
+    private String                  mCamCalibFileName = "CameraCalibration.yaml";
+    private String                  mORBBowVocabularyName = "ORBBoWVocabulary.txt";
+
     // Used to load the 'native-lib' library on application startup.
     static
     {
@@ -202,6 +213,23 @@ public class ORBSLAMCameraActivity
         });
 
 
+        // Initialize the ORB SLAM System
+        mORBEngine = new IORBSEngineJNI();
+
+
+        // Copy Assets to external file directory
+        final File calibFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), mCamCalibFileName);
+        if (!calibFile.exists()){
+            copyAsset(mCamCalibFileName);
+        }
+
+        double t0 = System.currentTimeMillis();
+        final File vocFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), mORBBowVocabularyName);
+        if (!vocFile.exists()) {
+            copyAsset(mORBBowVocabularyName);
+        }
+        double t1 = System.currentTimeMillis();
+        double seconds = (t1 - t0)/1000.0;
     }
 
 
@@ -231,6 +259,51 @@ public class ORBSLAMCameraActivity
             mOpenCameraView.disableView();
         }
 
+        if (mORBEngine != null){
+            mORBEngine.Shutdown();
+            mORBEngine.isRunning = false;
+        }
+
+    }
+
+    // Copy Asset Files to External Storage.
+    // TODO: Extract into own class and process in separate thread.
+    private void copyAsset(String filename) {
+        AssetManager assetManager = getAssets();
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            in = assetManager.open(filename);
+            File outFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), filename);
+            out = new FileOutputStream(outFile);
+            copyFile(in, out);
+        } catch(IOException e) {
+            Log.e("tag", "Failed to copy asset file: " + filename, e);
+        }
+        finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    // NOOP
+                }
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    // NOOP
+                }
+            }
+        }
+    }
+
+    private void copyFile(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int read;
+        while((read = in.read(buffer)) != -1){
+            out.write(buffer, 0, read);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -251,7 +324,13 @@ public class ORBSLAMCameraActivity
     @Override
     public void onCameraViewStarted(int width, int height)
     {
-
+        if (!mORBEngine.isRunning) {
+            // TODO: Get teh Voc DB and settingsFile.
+            String vocDBFile = Environment.getExternalStorageDirectory().getAbsolutePath() + mORBBowVocabularyName;
+            String settingsFile = Environment.getExternalStorageDirectory().getAbsolutePath() + mCamCalibFileName;
+            mORBEngine.InitSystem(vocDBFile, settingsFile);
+            mORBEngine.isRunning = true;
+        }
     }
 
     /**
@@ -275,6 +354,8 @@ public class ORBSLAMCameraActivity
     public Mat onCameraFrame(CvCameraViewFrame inputFrame)
     {
         mRgbaImg = inputFrame.rgba();
+        mGrayImag = inputFrame.gray();
+        mORBEngine.TrackMonocular(mGrayImag.getNativeObjAddr(), mRgbaImg.getNativeObjAddr());
         return mRgbaImg;
     }
 
