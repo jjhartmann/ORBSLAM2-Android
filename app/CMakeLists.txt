@@ -56,7 +56,8 @@ add_library( native-lib
              src/main/cpp/VIOImage.cpp
              src/main/cpp/VIOEngine.cpp
              src/main/cpp/VOPose.cpp
-
+             src/main/cpp/IORBSEngine.cpp
+             src/main/cpp/ORBSEngine.cpp
 
              # ThirdParty
              ${dbow2_cpp_files}
