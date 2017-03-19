@@ -196,7 +196,7 @@ public class ORBSLAMCameraActivity
 
 
         // Configure the OpenCV Camera View
-        mOpenCameraView = (CameraBridgeViewBase) findViewById(R.id.tutorial1_activity_java_surface_view);
+        mOpenCameraView = (CameraBridgeViewBase) findViewById(R.id.java_surface_view);
         mOpenCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCameraView.setCvCameraViewListener(this);
 

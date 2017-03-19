@@ -42,7 +42,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <org.opencv.android.JavaCameraView
-            android:id="@+id/tutorial1_activity_java_surface_view"
+            android:id="@+id/java_surface_view"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:visibility="gone"
@@ -56,6 +56,7 @@
             android:visibility="gone"
             opencv:camera_id="any"
             opencv:show_fps="true"/>
+
 
 
     </RelativeLayout>
