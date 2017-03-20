@@ -1,12 +1,12 @@
-Camera.fx: 23.654
-Camera.fy: 23.296
-Camera.cx: 640.215
-Camera.cy: 394.375
+Camera.fx: 611.8599299443845
+Camera.fy: 611.8599299443845
+Camera.cx: 640.0
+Camera.cy: 390.0
 
-Camera.k1: -0.28340811
-Camera.k2: 0.07395907
-Camera.p1: 0.00019359
-Camera.p2: 1.76187114e-05
+Camera.k1: 0.0069585596151655734
+Camera.k2: -0.06434273303583284
+Camera.p1: 0.0
+Camera.p2: 0.0
 Camera.fps: 30.0
 Camera.RGB: 1
 

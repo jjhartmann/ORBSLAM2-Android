@@ -40,7 +40,7 @@ public class CameraCalibrator {
     private Mat mDistortionCoefficients = new Mat();
     private int mFlags;
     private double mRms;
-    private double mSquareSize = 0.0181;
+    private double mSquareSize = 0.015;
     private Size mImageSize;
 
     public CameraCalibrator(int width, int height) {

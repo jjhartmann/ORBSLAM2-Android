@@ -2,7 +2,7 @@
 # documentation: https://d.android.com/studio/projects/add-native-code.html
 
 # Sets the minimum version of CMake required to build the native library.
-set(pathToProject "D:/Git_Dir/VisualInertialOdometry-Android-UW-SAR-2")
+set(pathToProject "${CMAKE_CURRENT_SOURCE_DIR}/../")
 set(pathToOpenCv "D:/ThirdParty/opencv-3.2.0-android-sdk/OpenCV-android-sdk")
 
 cmake_minimum_required(VERSION 3.4.1)
