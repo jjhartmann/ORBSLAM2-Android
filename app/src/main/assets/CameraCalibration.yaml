@@ -13,11 +13,11 @@ Camera.p2: 0.000021178
 Camera.fps: 30.0
 Camera.RGB: 1
 Camera.width: 1260
-Camera.height: 780
+Camera.height: 768
 
-ORBextractor.nFeatures: 1000
+ORBextractor.nFeatures: 500
 ORBextractor.scaleFactor: 1.2
-ORBextractor.nLevels: 8
+ORBextractor.nLevels: 10
 ORBextractor.iniThFAST: 30
 ORBextractor.minThFAST: 3
 

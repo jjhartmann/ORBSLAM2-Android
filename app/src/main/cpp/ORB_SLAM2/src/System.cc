@@ -54,18 +54,18 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     LOGD("Input sensor was set to: ");
 
     if(mSensor==MONOCULAR)
-        LOGD("Monocular");
+        LOGD("\tMonocular");
     else if(mSensor==STEREO)
-        LOGD("Stereo");
+        LOGD("\tStereo");
     else if(mSensor==RGBD)
-        LOGD("RGB-D");
+        LOGD("\tRGB-D");
 
     //Check settings file
     cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);
     if(!fsSettings.isOpened())
     {
        LOGE("Failed to open settings file at: ", strSettingsFile.c_str());
-       throw std::runtime_error(std::string("Failed to open settings file at: ") + strSettingsFile);
+       throw std::runtime_error(std::string("Failed to open settings file at: %s") + strSettingsFile);
     }
 
 

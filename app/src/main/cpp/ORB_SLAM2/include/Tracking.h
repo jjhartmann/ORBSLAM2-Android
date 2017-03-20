@@ -91,6 +91,7 @@ public:
 
     // Input sensor
     int mSensor;
+    int mMinCorrespondence;
 
     // Current Frame
     Frame mCurrentFrame;

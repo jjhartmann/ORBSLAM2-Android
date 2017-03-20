@@ -39,17 +39,35 @@
 #include <android/log.h>
 #define LOG_TAG "ORB_SLAM_TRACK"
 
-#define LOGD(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_INFO,LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG, __VA_ARGS__)
 
 using namespace std;
 
 namespace ORB_SLAM2
 {
 
-Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Map *pMap, KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor):
-    mState(NO_IMAGES_YET), mSensor(sensor), mbOnlyTracking(false), mbVO(false), mpORBVocabulary(pVoc),
-    mpKeyFrameDB(pKFDB), mpInitializer(static_cast<Initializer*>(NULL)), mpSystem(pSys),
-    mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpMap(pMap), mnLastRelocFrameId(0)
+Tracking::Tracking(System *pSys,
+                   ORBVocabulary* pVoc,
+                   FrameDrawer *pFrameDrawer,
+                   MapDrawer *pMapDrawer,
+                   Map *pMap,
+                   KeyFrameDatabase* pKFDB,
+                   const string &strSettingPath,
+                   const int sensor):
+    mState(NO_IMAGES_YET),
+    mSensor(sensor),
+    mbOnlyTracking(false),
+    mbVO(false),
+    mpORBVocabulary(pVoc),
+    mpKeyFrameDB(pKFDB),
+    mpInitializer(static_cast<Initializer*>(NULL)),
+    mpSystem(pSys),
+    mpFrameDrawer(pFrameDrawer),
+    mpMapDrawer(pMapDrawer),
+    mpMap(pMap),
+    mnLastRelocFrameId(0),
+    mMinCorrespondence(50)
 {
     // Load camera parameters from settings file
 
@@ -89,27 +107,27 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     mMinFrames = 0;
     mMaxFrames = fps;
 
-    cout << endl << "Camera Parameters: " << endl;
-    cout << "- fx: " << fx << endl;
-    cout << "- fy: " << fy << endl;
-    cout << "- cx: " << cx << endl;
-    cout << "- cy: " << cy << endl;
-    cout << "- k1: " << DistCoef.at<float>(0) << endl;
-    cout << "- k2: " << DistCoef.at<float>(1) << endl;
+    LOGD("\n\nCamera Parameters: ");
+    LOGD("\t- fx: %f", fx);
+    LOGD("\t- fy: %f", fy);
+    LOGD("\t- cx: %f", cx);
+    LOGD("\t- cy: %f", cy);
+    LOGD("\t- k1: %f", DistCoef.at<float>(0));
+    LOGD("\t- k2: %f", DistCoef.at<float>(1));
     if(DistCoef.rows==5)
-        cout << "- k3: " << DistCoef.at<float>(4) << endl;
-    cout << "- p1: " << DistCoef.at<float>(2) << endl;
-    cout << "- p2: " << DistCoef.at<float>(3) << endl;
-    cout << "- fps: " << fps << endl;
+        LOGD("\t- k3: %f", DistCoef.at<float>(4));
+    LOGD("\t- p1: %f", DistCoef.at<float>(2));
+    LOGD("\t- p2: %f", DistCoef.at<float>(3));
+    LOGD("\t- fps: %f", fps);
 
 
     int nRGB = fSettings["Camera.RGB"];
     mbRGB = nRGB;
 
     if(mbRGB)
-        cout << "- color order: RGB (ignored if grayscale)" << endl;
+        LOGD("- color order: RGB (ignored if grayscale)");
     else
-        cout << "- color order: BGR (ignored if grayscale)" << endl;
+       LOGD("- color order: BGR (ignored if grayscale)");
 
     // Load ORB parameters
 
@@ -127,17 +145,17 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     if(sensor==System::MONOCULAR)
         mpIniORBextractor = new ORBextractor(2*nFeatures,fScaleFactor,nLevels,fIniThFAST,fMinThFAST);
 
-    cout << endl  << "ORB Extractor Parameters: " << endl;
-    cout << "- Number of Features: " << nFeatures << endl;
-    cout << "- Scale Levels: " << nLevels << endl;
-    cout << "- Scale Factor: " << fScaleFactor << endl;
-    cout << "- Initial Fast Threshold: " << fIniThFAST << endl;
-    cout << "- Minimum Fast Threshold: " << fMinThFAST << endl;
+    LOGD("\n\nORB Extractor Parameters: ");
+    LOGD("\t- Number of Features: %i", nFeatures);
+    LOGD("\t- Scale Levels: %i", nLevels);
+    LOGD("\t- Scale Factor: %f", fScaleFactor);
+    LOGD("\t- Initial Fast Threshold: %i", fIniThFAST);
+    LOGD("\t- Minimum Fast Threshold: %i", fMinThFAST);
 
     if(sensor==System::STEREO || sensor==System::RGBD)
     {
         mThDepth = mbf*(float)fSettings["ThDepth"]/fx;
-        cout << endl << "Depth Threshold (Close/Far Points): " << mThDepth << endl;
+        LOGD("Depth Threshold (Close/Far Points): %f", mThDepth);
     }
 
     if(sensor==System::RGBD)
@@ -606,7 +624,7 @@ void Tracking::MonocularInitialization()
         int nmatches = matcher.SearchForInitialization(mInitialFrame,mCurrentFrame,mvbPrevMatched,mvIniMatches,100);
 
         // Check if there are enough correspondences
-        if(nmatches<100)
+        if(nmatches < mMinCorrespondence)
         {
             LOGD("Not enough correspondence. NMatches: %i", nmatches);
             delete mpInitializer;
@@ -690,7 +708,7 @@ void Tracking::CreateInitialMapMonocular()
 
     // Bundle Adjustment
     LOGD("New Map created with points");
-    cout << "New Map created with " << mpMap->MapPointsInMap() << " points" << endl;
+    cout << "New Map created with %i" << mpMap->MapPointsInMap() << " points" << endl;
 
     Optimizer::GlobalBundleAdjustemnt(mpMap,20);
 
@@ -698,7 +716,7 @@ void Tracking::CreateInitialMapMonocular()
     float medianDepth = pKFini->ComputeSceneMedianDepth(2);
     float invMedianDepth = 1.0f/medianDepth;
 
-    if(medianDepth<0 || pKFcur->TrackedMapPoints(1)<100)
+    if(medianDepth < 0 || pKFcur->TrackedMapPoints(1) < mMinCorrespondence)
     {
     	LOGD("Wrong initialization, reseting...");
         Reset();

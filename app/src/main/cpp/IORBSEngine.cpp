@@ -41,7 +41,7 @@ Java_org_jjhartmann_jeremy_testopencv2_JNIBindings_IORBSEngineJNI_TrackMonocular
     Mat &cFrameDraw = *(Mat *)matFrameDrawAddr; // NOT OWNED
 
     // Call method to process image
-    cv::Mat framedraw = orbSlamEngine->ProcessImage(cImg);
+    cv::Mat framedraw = orbSlamEngine->ProcessImage(cRgbaImg);
     framedraw.copyTo(cFrameDraw);
     cvtColor(cFrameDraw, cFrameDraw, CV_BGR2BGRA);
 }

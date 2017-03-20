@@ -21,12 +21,16 @@
 #include "Initializer.h"
 
 #include <../../Thirdparty/DBoW2/DUtils/Random.h>
+#include <android/log.h>
 
 #include "Optimizer.h"
 #include "ORBmatcher.h"
 
 #include<thread>
+#define LOG_TAG "ORB_SLAM_TRACK"
 
+#define LOGD(...) __android_log_print(ANDROID_LOG_INFO,LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG, __VA_ARGS__)
 namespace ORB_SLAM2
 {
 
@@ -470,6 +474,8 @@ float Initializer::CheckFundamental(const cv::Mat &F21, vector<bool> &vbMatchesI
 bool Initializer::ReconstructF(vector<bool> &vbMatchesInliers, cv::Mat &F21, cv::Mat &K,
                             cv::Mat &R21, cv::Mat &t21, vector<cv::Point3f> &vP3D, vector<bool> &vbTriangulated, float minParallax, int minTriangulated)
 {
+    LOGD("\n\nReconstructF:");
+
     int N=0;
     for(size_t i=0, iend = vbMatchesInliers.size() ; i<iend; i++)
         if(vbMatchesInliers[i])
@@ -516,6 +522,12 @@ bool Initializer::ReconstructF(vector<bool> &vbMatchesInliers, cv::Mat &F21, cv:
     // If there is not a clear winner or not enough triangulated points reject initialization
     if(maxGood<nMinGood || nsimilar>1)
     {
+        LOGD("CONDTIONAL FAILED:");
+        LOGD("\t if(maxGood<nMinGood || nsimilar>1)");
+        LOGD("\t\tmaxGood: %i", maxGood);
+        LOGD("\t\tnMinGood: %i", nMinGood);
+        LOGD("\t\tnsimilar: %f", nsimilar);
+
         return false;
     }
 
@@ -565,13 +577,14 @@ bool Initializer::ReconstructF(vector<bool> &vbMatchesInliers, cv::Mat &F21, cv:
             return true;
         }
     }
-
+    LOGD("Recahed end of ReconstructF");
     return false;
 }
 
 bool Initializer::ReconstructH(vector<bool> &vbMatchesInliers, cv::Mat &H21, cv::Mat &K,
                       cv::Mat &R21, cv::Mat &t21, vector<cv::Point3f> &vP3D, vector<bool> &vbTriangulated, float minParallax, int minTriangulated)
 {
+    LOGD("\n\nReconstructH: ");
     int N=0;
     for(size_t i=0, iend = vbMatchesInliers.size() ; i<iend; i++)
         if(vbMatchesInliers[i])
@@ -596,6 +609,9 @@ bool Initializer::ReconstructH(vector<bool> &vbMatchesInliers, cv::Mat &H21, cv:
 
     if(d1/d2<1.00001 || d2/d3<1.00001)
     {
+        LOGE("if(d1/d2<1.00001 || d2/d3<1.00001) Failed: ");
+        LOGE("\td1/d2: %f", d1/d2);
+        LOGE("\td2/d3: %f", d2/d3);
         return false;
     }
 
@@ -717,9 +733,18 @@ bool Initializer::ReconstructH(vector<bool> &vbMatchesInliers, cv::Mat &H21, cv:
         }
     }
 
-
-    if(secondBestGood<0.75*bestGood && bestParallax>=minParallax && bestGood>minTriangulated && bestGood>0.9*N)
+//    secondBestGood<0.75*bestGood &&
+    if( bestParallax>=minParallax && bestGood>minTriangulated && bestGood>0.9*N)
     {
+        LOGD("**CONDTIONAL SUCCEEDED**:");
+        LOGD("\t if(secondBestGood<0.75*bestGood && bestParallax>=minParallax && bestGood>minTriangulated && bestGood>0.9*N)");
+        LOGD("\t\tsecondBestGood: %i", secondBestGood);
+        LOGD("\t\tbestGood: %i", bestGood);
+        LOGD("\t\tbestParallax: %f", bestParallax);
+        LOGD("\t\tminParallax: %f", minParallax);
+        LOGD("\t\tminTriangulated: %i", minTriangulated);
+        LOGD("\t\tN: %i", N);
+
         vR[bestSolutionIdx].copyTo(R21);
         vt[bestSolutionIdx].copyTo(t21);
         vP3D = bestP3D;
@@ -728,6 +753,14 @@ bool Initializer::ReconstructH(vector<bool> &vbMatchesInliers, cv::Mat &H21, cv:
         return true;
     }
 
+    LOGD("CONDTIONAL FAILED:");
+    LOGD("\t if(secondBestGood<0.75*bestGood && bestParallax>=minParallax && bestGood>minTriangulated && bestGood>0.9*N)");
+    LOGD("\t\tsecondBestGood: %i", secondBestGood);
+    LOGD("\t\tbestGood: %i", bestGood);
+    LOGD("\t\tbestParallax: %f", bestParallax);
+    LOGD("\t\tminParallax: %f", minParallax);
+    LOGD("\t\tminTriangulated: %i", minTriangulated);
+    LOGD("\t\tN: %i", N);
     return false;
 }
 
