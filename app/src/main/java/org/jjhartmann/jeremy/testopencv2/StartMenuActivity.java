@@ -28,5 +28,15 @@ public class StartMenuActivity extends Activity
                 startActivity(intent);
             }
         });
+
+        // Init OrbSlamExample
+        final Button bORBSlamView = (Button) findViewById(R.id.button_debug_view);
+        bORBSlamView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(StartMenuActivity.this, ORBSLAMCameraActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }
