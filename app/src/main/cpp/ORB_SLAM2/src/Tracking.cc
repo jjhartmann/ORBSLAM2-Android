@@ -29,6 +29,7 @@
 #include"Converter.h"
 #include"Map.h"
 #include"Initializer.h"
+#include <string>
 
 #include"Optimizer.h"
 #include"PnPsolver.h"
@@ -37,6 +38,11 @@
 
 #include<mutex>
 #include <android/log.h>
+#include <sstream>
+
+#define SSTR( x ) static_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
+
 #define LOG_TAG "ORB_SLAM_TRACK"
 
 #define LOGD(...) __android_log_print(ANDROID_LOG_INFO,LOG_TAG, __VA_ARGS__)
@@ -67,7 +73,7 @@ Tracking::Tracking(System *pSys,
     mpMapDrawer(pMapDrawer),
     mpMap(pMap),
     mnLastRelocFrameId(0),
-    mMinCorrespondence(50)
+    mMinCorrespondence(20)
 {
     // Load camera parameters from settings file
 
@@ -281,6 +287,16 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
     else
         mCurrentFrame = Frame(mImGray,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
     Track();
+
+    LOGD("ORB_Translation ==>> mTcw: ");
+    string tmat = "";
+    for (int i = 0; i < mCurrentFrame.mTcw.rows; ++i){
+        for (int j = 0; j < mCurrentFrame.mTcw.cols; ++j){
+            tmat = tmat + SSTR(mCurrentFrame.mTcw.at<float>(i, j)) + "\t";
+        }
+        tmat += "\n";
+    }
+    LOGD("%s",tmat.c_str());
 
     return mCurrentFrame.mTcw.clone();
 }
@@ -497,7 +513,7 @@ void Tracking::Track()
         {
             if(mpMap->KeyFramesInMap()<=5)
             {
-                cout << "Track lost soon after initialisation, reseting..." << endl;
+               LOGE("Track lost soon after initialisation, reseting...");
                 mpSystem->Reset();
                 return;
             }
