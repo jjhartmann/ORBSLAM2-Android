@@ -15,9 +15,9 @@ Camera.RGB: 1
 Camera.width: 1260
 Camera.height: 768
 
-ORBextractor.nFeatures: 200
+ORBextractor.nFeatures: 5000
 ORBextractor.scaleFactor: 1.2
-ORBextractor.nLevels: 4
+ORBextractor.nLevels: 8
 ORBextractor.iniThFAST: 10
 ORBextractor.minThFAST: 3
 
